@@ -1,58 +1,41 @@
 const piantaSDK = require("@pinata/sdk")
-const path = require("path")
 const fs = require("fs")
 require("dotenv")
+const TextToSvg = require("text-to-svg")
 
 const piantaApiKey = process.env.PINATA_API_KEY
 const pinataApiSecret = process.env.PINATA_API_SECRET
 
-const pinata = new piantaSDK(piantaApiKey, pinataApiSecret) // to say pinata it is us who works....
+const pinata = new piantaSDK(piantaApiKey, pinataApiSecret)
 
-async function storeImages(imagesFilePath) {
-    const fullImagesPath = path.resolve(imagesFilePath)
-    const files = fs.readdirSync(fullImagesPath)
-    let responses = []
-    for (fileIndex in files) {
-        const readableStreamForFile = fs.createReadStream(
-            `${fullImagesPath}/${files[fileIndex]}`
-        )
-
-        const options = {
-            pinataMetadata: {
-                name: files[fileIndex],
-            },
-        }
-
-        try {
-            await pinata
-                .pinFileToIPFS(readableStreamForFile, options)
-                .then((result) => {
-                    responses.push(result)
-                })
-                .catch((err) => {
-                    console.log(err)
-                })
-        } catch (error) {
-            console.error(error)
-        }
+async function generateMessageSvg(_messageToSend) {
+    const textToSVG = TextToSvg.loadSync()
+    const attributes = { fill: "yellow", stroke: "blue" }
+    const options = {
+        x: 0,
+        y: 0,
+        fontSize: 36,
+        anchor: "top",
+        attributes: attributes,
     }
 
-    return { responses, files }
+    const svg = textToSVG.getSVG(_messageToSend, options)
+    return svg
 }
 
-async function storeTokenUriMetadata(metadata) {
+async function storeMetadata(metadata) {
+    let response
     const options = {
         pinataMetadata: {
             name: metadata.name,
         },
     }
     try {
-        const response = await pinata.pinJSONToIPFS(metadata, options)
-        return response
+        response = await pinata.pinJSONToIPFS(metadata, options)
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
-    return null
+    return response
 }
 
-module.exports = { storeImages, storeTokenUriMetadata }
+module.exports = { generateMessageSvg, storeMetadata }

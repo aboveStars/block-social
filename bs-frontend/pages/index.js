@@ -1,11 +1,17 @@
 import { Inter } from "@next/font/google"
 import styles from "@/styles/Home.module.css"
-import { ConnectButton } from "web3uikit"
+import { Button, ConnectButton, Form } from "web3uikit"
 import Link from "next/link"
+import SendPostWorks from "@/components/sendPost"
+import { useState } from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export default function Home() {
+    const [input, setInput] = useState("")
+
+    const handleClick = () => {}
+
     return (
         <>
             <main className={styles.main}>
@@ -18,37 +24,8 @@ export default function Home() {
                 <div className={styles.center}>
                     <h1>BLOCK SOCIAL</h1>
                 </div>
-
-                <div className={styles.grid}>
-                    <a
-                        href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                        className={styles.card}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <h2 className={inter.className}>
-                            Send Post <span>-&gt;</span>
-                        </h2>
-                        <p className={inter.className}>
-                            Find in-depth information about Next.js features
-                            and&nbsp;API.
-                        </p>
-                    </a>
-
-                    <a
-                        href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                        className={styles.card}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <h2 className={inter.className}>
-                            List Posts <span>-&gt;</span>
-                        </h2>
-                        <p className={inter.className}>
-                            Learn about Next.js in an interactive course
-                            with&nbsp;quizzes!
-                        </p>
-                    </a>
+                <div>
+                    <SendPostWorks _functionForInput={setInput} />
                 </div>
             </main>
         </>

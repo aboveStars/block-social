@@ -1,0 +1,36 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: BlockSocial
+    network: goerli
+    source:
+      address: "0xA17e31C00D4561e0D77422EC1aDb1390D9d3a7b6"
+      abi: BlockSocial
+      startBlock: 8445748
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - ApprovalForAll
+        - MintingFinished
+        - MintingRequestReceived
+        - Transfer
+      abis:
+        - name: BlockSocial
+          file: ./abis/BlockSocial.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,indexed uint256)
+          handler: handleApproval
+        - event: ApprovalForAll(indexed address,indexed address,bool)
+          handler: handleApprovalForAll
+        - event: MintingFinished(indexed address,indexed uint256,indexed address)
+          handler: handleMintingFinished
+        - event: MintingRequestReceived(indexed address,indexed uint256,indexed address)
+          handler: handleMintingRequestReceived
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/block-social.ts
