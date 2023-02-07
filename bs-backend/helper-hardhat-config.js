@@ -37,6 +37,8 @@ const metaDataTemplate = {
 
 const svgPrefixForBase64 = "data:image/svg+xml;base64,"
 
+
+
 module.exports = {
     networkConfig,
     developmentChains,

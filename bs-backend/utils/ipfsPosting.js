@@ -15,7 +15,7 @@ async function postToIpfs(_messageToSend, doWeLog) {
 
     let _messageMetaData = { ...metaDataTemplate }
 
-    _messageMetaData.name = "rises"
+    _messageMetaData.name = "MessageExample"
     _messageMetaData.description = "I don't want to write description"
     _messageMetaData.attributes[0] = {
         trait_Type: "Impact",

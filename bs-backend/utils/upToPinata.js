@@ -1,5 +1,4 @@
 const piantaSDK = require("@pinata/sdk")
-const fs = require("fs")
 require("dotenv")
 const TextToSvg = require("text-to-svg")
 

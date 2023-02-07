@@ -1,6 +1,10 @@
 const { network } = require("hardhat")
 const { verify } = require("../utils/verify")
 const { developmentChains } = require("../helper-hardhat-config.js")
+const {
+    updateContractNetworkInformations,
+    updateContractAbi,
+} = require("../scripts/updateConstantsForFrontend")
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments
@@ -16,6 +20,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     if (!developmentChains.includes(network.name)) {
         await verify(blockSocial.address, [])
     }
+
+    await updateContractNetworkInformations(
+        "BlockSocial",
+        network.config.chainId.toString()
+    )
+
+    await updateContractAbi("BlockSocial")
 }
 
 module.exports.tags = ["all", "BlockSocial"]
