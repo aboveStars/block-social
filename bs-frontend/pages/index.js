@@ -1,28 +1,31 @@
 import { Inter } from "@next/font/google"
-import styles from "@/styles/Home.module.css"
-import { Button, ConnectButton, Form } from "web3uikit"
-import Link from "next/link"
+import { ConnectButton } from "web3uikit"
 import SendPostWorks from "@/components/sendPost"
+import GetPosts from "@/components/getPosts"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export default function Home() {
     return (
-        <>
-            <main className={styles.main}>
-                <nav>
-                    <Link href="/">
-                        <ConnectButton />
-                    </Link>
-                </nav>
-
-                <div className={styles.center}>
-                    <h1>BLOCK SOCIAL</h1>
+        <div>
+            <nav class="bg-gray-900 p-6 flex items-center justify-between">
+                <div class="flex items-center">
+                    <h1 class="text-white text-4xl font-bold tracking-tight text-shadow-lg">
+                        BlockSocial
+                    </h1>
                 </div>
-                <div>
+                <div class="flex">
+                    <ConnectButton />
+                </div>
+            </nav>
+            <div className="flex">
+                <div className="m-5">
                     <SendPostWorks />
                 </div>
-            </main>
-        </>
+                <div className="m-5">
+                    <GetPosts />
+                </div>
+            </div>
+        </div>
     )
 }

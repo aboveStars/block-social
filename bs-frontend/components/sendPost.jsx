@@ -2,7 +2,6 @@ import { generateFinalURI } from "@/scripts/generateUri"
 import { useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
-import { Button, Input } from "web3uikit"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
@@ -56,26 +55,33 @@ export default function SendPostWorks() {
     }
 
     return (
-        <div className="container">
-            <div>
-                <Input
-                    placeholder="type your message...."
-                    onChange={(evt) => {
-                        setInput(evt.target.value)
-                    }}
-                />
-            </div>
-
-            <div style={{ marginTop: 20, marginLeft: 110 }}>
-                <Button
-                    color="blue"
-                    onClick={() => {
-                        sendPost(generateFinalURI(input))
-                    }}
-                    text="Send Post"
-                    theme="colored"
-                    size="l"
-                />
+        <div>
+            <div class="flex flex-col">
+                <div class="w-64 p-6 bg-indigo-800 text-white shadow-lg">
+                    <input
+                        class="bg-black rounded-lg shadow-lg py-3 px-5 text-xl border border-indigo-500 focus:outline-none focus:shadow-outline w-full"
+                        type="text"
+                        placeholder="type your message...."
+                        onChange={(evt) => {
+                            setInput(evt.target.value)
+                        }}
+                    />
+                </div>
+                <div class="w-64 p-6 bg-indigo-800 text-white shadow-lg">
+                    <button
+                        class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded"
+                        onClick={async () => {
+                            await sendPost(
+                                await generateFinalURI(
+                                    input,
+                                    "Korkmaz's Post #53"
+                                )
+                            )
+                        }}
+                    >
+                        Send
+                    </button>
+                </div>
             </div>
         </div>
     )

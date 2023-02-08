@@ -5,7 +5,7 @@ async function main() {
     const blockSocial = await ethers.getContract("BlockSocial")
 
     try {
-        const metaUri = await postToIpfs("1881", true)
+        const metaUri = await postToIpfs("geçmiş olsun türkiyem sen her \n daim güçlü ve kuvvetlisin", true)
         const tx = await blockSocial.minting(metaUri)
         txR = await tx.wait(1)
     } catch (error) {

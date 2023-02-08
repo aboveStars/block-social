@@ -9,25 +9,28 @@ const metaDataTemplate = {
         },
     ],
 }
-// const svgPrefixForBase64 = "data:image/svg+xml;base64,"
+
+const svgPrefixForBase64 = "data:image/svg+xml;base64,"
 const jsonPrefixForBase64 = "data:application/json;base64,"
 
-import { UltimateTextToImage } from "ultimate-text-to-image"
+async function generateFinalURI(_messageToSend, _name) {
+    const messageSvg = await generateMessageSVG(_messageToSend)
+    const messageSvgString = messageSvg.toString()
 
-async function generateFinalURI(_messageToSend) {
-    const messageEncoded64PrefixedPng = await generateMessagePng(_messageToSend)
+    const base64Message = Buffer.from(messageSvgString).toString("base64")
 
-    const finalMessageSvg = messageEncoded64PrefixedPng
+    const mergedWithPrefix = `${svgPrefixForBase64}${base64Message}`
+    const finalImageSource = mergedWithPrefix
 
     let _messageMetaData = { ...metaDataTemplate }
 
-    _messageMetaData.name = "MessageExample"
-    _messageMetaData.description = "I don't want to write description"
+    _messageMetaData.name = _name
+    _messageMetaData.description = _messageToSend
     _messageMetaData.attributes[0] = {
         trait_Type: "Impact",
         value: 53,
     }
-    _messageMetaData.image = finalMessageSvg
+    _messageMetaData.image = finalImageSource
 
     const stringMetaData = JSON.stringify(_messageMetaData)
     const base64Meta = Buffer.from(stringMetaData).toString("base64")
@@ -40,11 +43,40 @@ async function generateFinalURI(_messageToSend) {
     return finalMetaCode
 }
 
-async function generateMessagePng(_messageToSend) {
-    const imageUri = new UltimateTextToImage(_messageToSend)
-        .render()
-        .toDataUrl()
-    return imageUri
+async function generateMessageSVG(_messageToSend) {
+    const imageSvg = `
+    <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">
+        <style>
+            div 
+                {
+                    word-wrap: break-word;
+                    color: white; 
+                    height: 100%;
+                    overflow: scroll; 
+                    font-family: monospace;
+                    font-size: 14px;
+                }
+        </style>
+
+        <rect
+            width="100%"
+            height="100%" 
+            fill="black"
+        />
+
+        <foreignObject
+            x="20"
+            y="20"
+            width="315px"
+            height="315px">
+                <div
+                    xmlns="http://www.w3.org/1999/xhtml">
+                    ${_messageToSend}
+                </div>
+        </foreignObject>
+    </svg>
+    `
+    return imageSvg
 }
 
-module.exports = { generateFinalURI }
+export { generateFinalURI }
