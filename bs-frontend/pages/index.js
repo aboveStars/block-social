@@ -8,13 +8,13 @@ const inter = Inter({ subsets: ["latin"] })
 export default function Home() {
     return (
         <div>
-            <nav class="bg-gray-900 p-6 flex items-center justify-between">
-                <div class="flex items-center">
-                    <h1 class="text-white text-4xl font-bold tracking-tight text-shadow-lg">
+            <nav className="bg-gray-900 p-6 flex items-center justify-between">
+                <div className="flex items-center">
+                    <h1 className="text-white text-4xl font-bold tracking-tight text-shadow-lg">
                         BlockSocial
                     </h1>
                 </div>
-                <div class="flex">
+                <div className="flex">
                     <ConnectButton />
                 </div>
             </nav>

@@ -56,10 +56,10 @@ export default function SendPostWorks() {
 
     return (
         <div>
-            <div class="flex flex-col">
-                <div class="w-64 p-6 bg-indigo-800 text-white shadow-lg">
+            <div className="flex flex-col">
+                <div className="w-64 p-6 bg-indigo-800 text-white shadow-lg">
                     <input
-                        class="bg-black rounded-lg shadow-lg py-3 px-5 text-xl border border-indigo-500 focus:outline-none focus:shadow-outline w-full"
+                        className="bg-black rounded-lg shadow-lg py-3 px-5 text-xl border border-indigo-500 focus:outline-none focus:shadow-outline w-full"
                         type="text"
                         placeholder="type your message...."
                         onChange={(evt) => {
@@ -67,9 +67,9 @@ export default function SendPostWorks() {
                         }}
                     />
                 </div>
-                <div class="w-64 p-6 bg-indigo-800 text-white shadow-lg">
+                <div className="w-64 p-6 bg-indigo-800 text-white shadow-lg">
                     <button
-                        class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded"
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded"
                         onClick={async () => {
                             await sendPost(
                                 await generateFinalURI(

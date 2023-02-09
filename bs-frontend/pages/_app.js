@@ -1,9 +1,9 @@
 import "@/styles/globals.css"
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client"
 import Head from "next/head"
+import React from "react"
 
 import { MoralisProvider } from "react-moralis"
-
 
 export default function App({ Component, pageProps }) {
     const client = new ApolloClient({
@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }) {
         uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.5",
     })
     return (
-        <div>
+        <>
             <Head>
                 <title>Block Social</title>
                 <meta
@@ -24,11 +24,12 @@ export default function App({ Component, pageProps }) {
                 />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
+
             <MoralisProvider initializeOnMount={false}>
                 <ApolloProvider client={client}>
                     <Component {...pageProps} />
                 </ApolloProvider>
             </MoralisProvider>
-        </div>
+        </>
     )
 }

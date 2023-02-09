@@ -1,5 +1,6 @@
 import getPostQuery from "@/subgraphQueries/graphQueries"
 import { useQuery } from "@apollo/client"
+import { data } from "autoprefixer"
 import { useEffect, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
@@ -11,23 +12,19 @@ export default function GetPosts() {
     const { chainId } = useMoralis()
     const { loading, error, data: dataFromQuery } = useQuery(getPostQuery)
 
-    // if (!chainId) {
-    //     return (
-    //         <div>
-    //             Fetching chainId......
-    //             {console.log("Fetching ChainId")}
-    //         </div>
-    //     )
-    // }
+    const [imageSource, setImageSource] = useState(null)
+    const [messageText, setMessageText] = useState(null)
 
-    // if (!dataFromQuery) {
-    //     return (
-    //         <div>
-    //             Fetching "data" from "theGraph"
-    //             {console.log("Fetching ChainId")}
-    //         </div>
-    //     )
-    // }
+    var neededTokenId
+
+    var networkNeedsSatisfied
+
+    useEffect(() => {
+        if (chainId && dataFromQuery) {
+            networkNeedsSatisfied = true
+            console.log("Network needs satisfied")
+        }
+    }, [chainId, dataFromQuery])
 
     async function handleApproveSuccess(tx) {
         console.log(`Waiting for : Confirmation`)
@@ -54,13 +51,14 @@ export default function GetPosts() {
     const getTokenURI = async (_tokenId) => {
         const _approveOptionsForSendNft = { ...approveOptions }
         _approveOptionsForSendNft.abi = blockSocialAbi
-        if (chainId != "undefined") {
+        if (chainId === "undefined" || chainId === null) {
+            console.error("ChainID not approprite")
+            return
+        } else {
             _approveOptionsForSendNft.contractAddress =
                 contractNetworkInformations["BlockSocial"][
                     Web3.utils.hexToNumberString(chainId)
                 ]
-        } else {
-            console.error("ChainID not approprite")
         }
         _approveOptionsForSendNft.functionName = "tokenURI"
         _approveOptionsForSendNft.params = {
@@ -74,34 +72,42 @@ export default function GetPosts() {
         return resultTokenId
     }
 
-    const [imageSource, setImageSource] = useState("")
-    const [message, setMessage] = useState("")
-    const [neededTokenId, setNeededTokenId] = useState("")
-
     async function handleClick() {
-        setNeededTokenId(
+        if (
+            networkNeedsSatisfied === null ||
+            networkNeedsSatisfied === "undefined"
+        ) {
+            console.error(`Is networkNeedsSatisfied: ${networkNeedsSatisfied}`)
+        }
+
+        const tokenIdReceived =
             dataFromQuery["mintingFinisheds"][0]["tokenId"].toString()
-        )
+
+        neededTokenId = tokenIdReceived
         console.log(`TokenId from graph: ${neededTokenId}`)
 
         const tokenUriOfMeta = (await getTokenURI(neededTokenId)).toString()
         console.log(`metaURI: ${tokenUriOfMeta}`)
 
         const jsonFormattedMeta = await (await fetch(tokenUriOfMeta)).json()
+
         console.log(jsonFormattedMeta)
 
-        setImageSource(jsonFormattedMeta.image.toString())
-        console.log(imageSource)
+        const imageSourceR = jsonFormattedMeta.image.toString()
+        setImageSource(imageSourceR)
 
-        setMessage(jsonFormattedMeta.description)
+        console.log(`IMAGE SOURCE: ${imageSourceR}`)
+
+        const descriptionR = jsonFormattedMeta.description
+        setMessageText(descriptionR)
     }
 
     return (
         <div>
-            <div class="flex flex-col">
+            <div className="flex flex-col">
                 <div>
                     <button
-                        class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-full shadow-lg transition-all duration-300"
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-full shadow-lg transition-all duration-300"
                         onClick={async () => {
                             await handleClick()
                         }}
@@ -109,23 +115,24 @@ export default function GetPosts() {
                         Get Posts
                     </button>
                 </div>
-                <div class="my-5">
-                    <div class="flex">
+                <div className="my-5">
+                    <div className="flex">
                         <div>
-                            {imageSource && (
-                                <>
-                                    <img
-                                        src={imageSource}
-                                        title={message}
-                                        width="100"
-                                        height="100"
-                                    />
-                                </>
+                            {typeof imageSource !== "undefined" &&
+                            imageSource != null ? (
+                                <img
+                                    src={imageSource}
+                                    title={messageText}
+                                    width="100"
+                                    height="100"
+                                />
+                            ) : (
+                                <>"Image source is undefined..."</>
                             )}
                         </div>
 
                         <div>
-                            <p>{message}</p>
+                            <p>{messageText}</p>
                         </div>
                     </div>
                 </div>
