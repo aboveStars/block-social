@@ -9,4 +9,18 @@ const getPostQuery = gql`
     }
 `
 
-export default getPostQuery
+function gqlCreatorForDesiredNftAddress(_desiredNftAddress) {
+    return gql`
+        {
+            mintingFinisheds(where: { nftAddress: "${_desiredNftAddress}" }) {
+                nftAddress
+                tokenId
+            }
+        }
+    `
+}
+
+module.exports = {
+    getPostQuery,
+    gqlCreatorForDesiredNftAddress,
+}

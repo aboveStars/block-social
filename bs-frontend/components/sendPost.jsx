@@ -57,16 +57,18 @@ export default function SendPostWorks() {
     return (
         <div>
             <div className="flex flex-col">
-                <div className="w-64 p-6 bg-indigo-800 text-white shadow-lg">
-                    <input
-                        className="bg-black rounded-lg shadow-lg py-3 px-5 text-xl border border-indigo-500 focus:outline-none focus:shadow-outline w-full"
-                        type="text"
-                        placeholder="type your message...."
+                <div className="relative mb-4">
+                    <textarea
+                        id="message"
+                        className="bg-white text-gray-900 rounded-lg py-2 px-4 block w-full appearance-none focus:outline-none focus:shadow-outline"
+                        placeholder="Enter your message here..."
+                        rows="4"
                         onChange={(evt) => {
                             setInput(evt.target.value)
                         }}
-                    />
+                    ></textarea>
                 </div>
+
                 <div className="w-64 p-6 bg-indigo-800 text-white shadow-lg">
                     <button
                         className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded"

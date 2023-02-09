@@ -27,9 +27,10 @@ contract BlockSocial is ERC721URIStorage {
 
         _safeMint(msg.sender, s_tokenCounter);
         _setTokenURI(s_tokenCounter, _uri);
-        s_tokenCounter += 1;
 
         emit MintingFinished(msg.sender, s_tokenCounter, address(this));
+
+        s_tokenCounter += 1;
     }
 
     function getTokenCount() public view returns (uint256 tokenCount) {

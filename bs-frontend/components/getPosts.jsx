@@ -1,6 +1,8 @@
-import getPostQuery from "@/subgraphQueries/graphQueries"
+import {
+    getPostQuery,
+    gqlCreatorForDesiredNftAddress,
+} from "@/subgraphQueries/graphQueries"
 import { useQuery } from "@apollo/client"
-import { data } from "autoprefixer"
 import { useEffect, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
@@ -8,20 +10,24 @@ import Web3 from "web3"
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
 
-export default function GetPosts() {
+export default function GetPosts({ _desiredAddress }) {
+    console.log(_desiredAddress)
     const { chainId } = useMoralis()
-    const { loading, error, data: dataFromQuery } = useQuery(getPostQuery)
+    const {
+        loading,
+        error,
+        data: dataFromQuery,
+    } = useQuery(gqlCreatorForDesiredNftAddress(_desiredAddress))
 
-    const [imageSource, setImageSource] = useState(null)
-    const [messageText, setMessageText] = useState(null)
+    
 
-    var neededTokenId
+    const [s_imagesArray, set_s_imagesArray] = useState(null)
 
-    var networkNeedsSatisfied
+    const [networkNeedsSatisfied, setNetworkNeedsSatisfied] = useState(false)
 
     useEffect(() => {
         if (chainId && dataFromQuery) {
-            networkNeedsSatisfied = true
+            setNetworkNeedsSatisfied(true)
             console.log("Network needs satisfied")
         }
     }, [chainId, dataFromQuery])
@@ -51,15 +57,12 @@ export default function GetPosts() {
     const getTokenURI = async (_tokenId) => {
         const _approveOptionsForSendNft = { ...approveOptions }
         _approveOptionsForSendNft.abi = blockSocialAbi
-        if (chainId === "undefined" || chainId === null) {
-            console.error("ChainID not approprite")
-            return
-        } else {
-            _approveOptionsForSendNft.contractAddress =
-                contractNetworkInformations["BlockSocial"][
-                    Web3.utils.hexToNumberString(chainId)
-                ]
-        }
+
+        _approveOptionsForSendNft.contractAddress =
+            contractNetworkInformations["BlockSocial"][
+                Web3.utils.hexToNumberString(chainId)
+            ]
+
         _approveOptionsForSendNft.functionName = "tokenURI"
         _approveOptionsForSendNft.params = {
             tokenId: _tokenId,
@@ -73,38 +76,53 @@ export default function GetPosts() {
     }
 
     async function handleClick() {
-        if (
-            networkNeedsSatisfied === null ||
-            networkNeedsSatisfied === "undefined"
-        ) {
+        if (networkNeedsSatisfied == false) {
             console.error(`Is networkNeedsSatisfied: ${networkNeedsSatisfied}`)
+            return
+        } else {
+            console.log("We are good to go about graph")
+            console.log(dataFromQuery)
         }
 
-        const tokenIdReceived =
-            dataFromQuery["mintingFinisheds"][0]["tokenId"].toString()
+        const allMintingFinishedsArray = dataFromQuery["mintingFinisheds"] // 1.data 2.data 3.data 4.data ....
 
-        neededTokenId = tokenIdReceived
-        console.log(`TokenId from graph: ${neededTokenId}`)
+        const tokenIds = allMintingFinishedsArray.map(function (
+            mintingFinished
+        ) {
+            return mintingFinished["tokenId"].toString()
+        })
 
-        const tokenUriOfMeta = (await getTokenURI(neededTokenId)).toString()
-        console.log(`metaURI: ${tokenUriOfMeta}`)
+        const metaUriArray = tokenIds.map(async function (tokenId) {
+            const fetchedMetaUri = await getTokenURI(tokenId)
 
-        const jsonFormattedMeta = await (await fetch(tokenUriOfMeta)).json()
+            if ((typeof fetchedMetaUri).toString() !== "undefined") {
+                const finalFetchedMetaUri = fetchedMetaUri.toString()
+                return finalFetchedMetaUri
+            }
+        })
 
-        console.log(jsonFormattedMeta)
+        const imagesArray = (await Promise.all(metaUriArray)).map(
+            async function (metaUri) {
+                if ((typeof metaUri).toString() !== "undefined") {
+                    const jsonFormattedMeta = await (
+                        await fetch(metaUri)
+                    ).json()
 
-        const imageSourceR = jsonFormattedMeta.image.toString()
-        setImageSource(imageSourceR)
+                    const imageUri = jsonFormattedMeta.image.toString()
+                    // console.log(imageUri)
+                    return imageUri
+                }
+            }
+        )
 
-        console.log(`IMAGE SOURCE: ${imageSourceR}`)
-
-        const descriptionR = jsonFormattedMeta.description
-        setMessageText(descriptionR)
+        set_s_imagesArray(await Promise.all(imagesArray))
     }
 
     return (
         <div>
             <div className="flex flex-col">
+                
+             </div>
                 <div>
                     <button
                         className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-full shadow-lg transition-all duration-300"
@@ -116,27 +134,40 @@ export default function GetPosts() {
                     </button>
                 </div>
                 <div className="my-5">
-                    <div className="flex">
+                    <div className="flex flex-col">
                         <div>
-                            {typeof imageSource !== "undefined" &&
-                            imageSource != null ? (
-                                <img
-                                    src={imageSource}
-                                    title={messageText}
-                                    width="100"
-                                    height="100"
-                                />
-                            ) : (
-                                <>"Image source is undefined..."</>
-                            )}
-                        </div>
+                            {(typeof s_imagesArray).toString() !==
+                                "undefined" && s_imagesArray != null ? (
+                                <>
+                                    {s_imagesArray.map((imageSrc) => {
+                                        if (
+                                            typeof imageSrc !== "undefined" &&
+                                            imageSrc != null
+                                        ) {
+                                            console.log(imageSrc)
+                                            return (
+                                                <img
+                                                    className="my-5"
+                                                    key={imageSrc}
+                                                    src={imageSrc}
+                                                    width="200"
+                                                    height="200"
+                                                />
+                                            )
+                                        }
+                                    })}
 
-                        <div>
-                            <p>{messageText}</p>
+                                    {console.log("We should see photos...")}
+                                </>
+                            ) : (
+                                <>
+                                    {console.log("No....")}
+                                    Heeeehhhhheehh
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     )
 }
