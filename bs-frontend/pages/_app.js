@@ -5,11 +5,12 @@ import React from "react"
 
 import { MoralisProvider } from "react-moralis"
 
+export const apolloClient = new ApolloClient({
+    cache: new InMemoryCache(),
+    uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.6",
+})
+
 export default function App({ Component, pageProps }) {
-    const client = new ApolloClient({
-        cache: new InMemoryCache(),
-        uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.5",
-    })
     return (
         <>
             <Head>
@@ -26,7 +27,7 @@ export default function App({ Component, pageProps }) {
             </Head>
 
             <MoralisProvider initializeOnMount={false}>
-                <ApolloProvider client={client}>
+                <ApolloProvider client={apolloClient}>
                     <Component {...pageProps} />
                 </ApolloProvider>
             </MoralisProvider>

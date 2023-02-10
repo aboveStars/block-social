@@ -6,9 +6,9 @@ dataSources:
     name: BlockSocial
     network: goerli
     source:
-      address: "0xA17e31C00D4561e0D77422EC1aDb1390D9d3a7b6"
+      address: "0x6000C8C0C0E149A33BA62463B01134d9617269F6"
       abi: BlockSocial
-      startBlock: 8445748
+      startBlock: 8467855
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
