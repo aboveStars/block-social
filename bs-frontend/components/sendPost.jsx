@@ -2,7 +2,7 @@ import { generateFinalURI } from "@/scripts/generateUri"
 import { useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
-import { Loading, Stepper } from "web3uikit"
+import { Loading, Stepper, useNotification } from "web3uikit"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
@@ -14,17 +14,42 @@ export default function SendPostWorks() {
 
     const { chainId } = useMoralis()
 
+    const dispatch = useNotification()
+
     async function handleApproveSuccess(tx) {
+        handleNewNotification(
+            "warning",
+            "Transaction in Progress",
+            "Post Waiting for Confirmation"
+        )
+
         setTransactionHash(tx.hash.toString())
         console.log("Hash of tx: " + tx.hash.toString())
+
         setShowLoadingScreen(true)
+
         console.log("waiting for confirmaitons......")
         const rTx = await tx.wait(2)
+
+        handleNewNotification(
+            "success",
+            "Transaction Confirmed!",
+            "Post Successfully Sent!"
+        )
+
         console.log(rTx)
         console.log("Confirmed")
-        setShowLoadingScreen(false)
 
-        // Give notification...
+        setShowLoadingScreen(false)
+    }
+
+    function handleNewNotification(_type, _title, _message) {
+        dispatch({
+            type: _type,
+            message: _message,
+            title: _title,
+            position: "topR",
+        })
     }
 
     const { runContractFunction } = useWeb3Contract({})
@@ -83,7 +108,7 @@ export default function SendPostWorks() {
                         <a
                             href={`https://goerli.etherscan.io/tx/${transactionHash}`}
                             target="_blank"
-                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                         >
                             View transaction on etherscan
                         </a>

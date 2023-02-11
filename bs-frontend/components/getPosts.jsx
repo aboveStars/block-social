@@ -1,5 +1,5 @@
 import { apolloClient } from "@/pages/_app"
-import { gqlCreatorForDesiredNftAddress } from "@/subgraphQueries/graphQueries"
+import { gqlCreatorForDesiredSenderAddress } from "@/subgraphQueries/graphQueries"
 import waitUntil from "@/utils/waitUntil"
 import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
@@ -12,7 +12,7 @@ var contractNetworkInformations = require("../contractInformations/BlockSocial_N
 export default function GetPosts() {
     const { chainId } = useMoralis()
 
-    const [desiredAddress, setDesiredAddress] = useState(null)
+    const [desiredSenderAddress, setDesiredSenderAddress] = useState(null)
     const [imagesArray, setImagesArray] = useState(null)
 
     const [chainIdOk, setChainIdOk] = useState(false)
@@ -92,7 +92,7 @@ export default function GetPosts() {
             error,
             loading,
         } = await apolloClient.query({
-            query: gqlCreatorForDesiredNftAddress(desiredAddress),
+            query: gqlCreatorForDesiredSenderAddress(desiredSenderAddress),
         })
 
         if (loading) {
@@ -117,7 +117,17 @@ export default function GetPosts() {
 
         const allMintingFinishedsArray = dataFromQuery["mintingFinisheds"] // 1.data 2.data 3.data 4.data ....
 
-        const tokenIds = allMintingFinishedsArray.map(function (
+        const orderedByTokenIdAllMintingFinishedArrays = [
+            ...allMintingFinishedsArray,
+        ]
+
+        orderedByTokenIdAllMintingFinishedArrays.sort((a, b) => {
+            return b.tokenId - a.tokenId //
+        })
+
+        console.log(orderedByTokenIdAllMintingFinishedArrays)
+
+        const tokenIds = orderedByTokenIdAllMintingFinishedArrays.map(function (
             mintingFinished
         ) {
             return mintingFinished["tokenId"].toString()
@@ -166,10 +176,10 @@ export default function GetPosts() {
                         <textarea
                             id="address-input"
                             className="bg-white text-gray-900 rounded-lg py-2 px-4 block w-full appearance-none focus:outline-none focus:shadow-outline"
-                            placeholder="Please provide an address for posts..."
+                            placeholder="Please provide a sender address for posts..."
                             rows="3"
                             onChange={(evt) => {
-                                setDesiredAddress(evt.target.value)
+                                setDesiredSenderAddress(evt.target.value)
                             }}
                         />
                     </div>
@@ -193,28 +203,42 @@ export default function GetPosts() {
                             <>
                                 {console.log("we should see photos")}
                                 {imagesArray.map((imageSrc) => {
-                                    const tokenIdOfImage =
-                                        tokenIdImageUriArray[imageSrc]
+                                    {
+                                        {
+                                            const tokenIdOfImage =
+                                                tokenIdImageUriArray[imageSrc]
 
-                                    const openSeaUrlForImage = `https://testnets.opensea.io/assets/goerli/0x6000c8c0c0e149a33ba62463b01134d9617269f6/${tokenIdOfImage}`
-                                    if (
-                                        typeof imageSrc !== "undefined" &&
-                                        imageSrc != null
-                                    ) {
-                                        return (
-                                            <a
-                                                href={openSeaUrlForImage}
-                                                target="_blank"
-                                            >
-                                                <img
-                                                    className="my-5"
-                                                    key={imageSrc}
-                                                    src={imageSrc}
-                                                    width="200"
-                                                    height="200"
-                                                />
-                                            </a>
-                                        )
+                                            const openSeaUrlForImage = `https://testnets.opensea.io/assets/goerli/0x6000c8c0c0e149a33ba62463b01134d9617269f6/${tokenIdOfImage}`
+                                            if (
+                                                typeof imageSrc !==
+                                                    "undefined" &&
+                                                imageSrc != null
+                                            ) {
+                                                return (
+                                                    <>
+                                                        <a
+                                                            href={
+                                                                openSeaUrlForImage
+                                                            }
+                                                            target="_blank"
+                                                        >
+                                                            <figure>
+                                                                <img
+                                                                    className="my-5"
+                                                                    src={
+                                                                        imageSrc
+                                                                    }
+                                                                    width="200"
+                                                                    height="200"
+                                                                />
+                                                                <figcaption>{`#${tokenIdOfImage}`}</figcaption>
+                                                            </figure>
+                                                        </a>
+                                                        <hr />
+                                                    </>
+                                                )
+                                            }
+                                        }
                                     }
                                 })}
                             </>
@@ -229,6 +253,59 @@ export default function GetPosts() {
                                         width: "250px",
                                         gap: "5px",
                                     }}
+                                    className="my-2"
+                                >
+                                    <Skeleton theme="image" />
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                        }}
+                                    >
+                                        <Skeleton theme="text" />
+                                        <Skeleton
+                                            theme="subtitle"
+                                            width="30%"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        padding: "10px",
+                                        border: "1px solid",
+                                        borderRadius: "20px",
+                                        width: "250px",
+                                        gap: "5px",
+                                    }}
+                                    className="my-2"
+                                >
+                                    <Skeleton theme="image" />
+                                    <div
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                        }}
+                                    >
+                                        <Skeleton theme="text" />
+                                        <Skeleton
+                                            theme="subtitle"
+                                            width="30%"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        padding: "10px",
+                                        border: "1px solid",
+                                        borderRadius: "20px",
+                                        width: "250px",
+                                        gap: "5px",
+                                    }}
+                                    className="my-2"
                                 >
                                     <Skeleton theme="image" />
                                     <div

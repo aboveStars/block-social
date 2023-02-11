@@ -20,7 +20,19 @@ function gqlCreatorForDesiredNftAddress(_desiredNftAddress) {
     `
 }
 
+function gqlCreatorForDesiredSenderAddress(_desiredSenderAddress) {
+    return gql`
+        {
+            mintingFinisheds(where: { from: "${_desiredSenderAddress}" }) {
+                nftAddress
+                tokenId
+            }
+        }
+    `
+}
+
 module.exports = {
     getPostQuery,
     gqlCreatorForDesiredNftAddress,
+    gqlCreatorForDesiredSenderAddress,
 }

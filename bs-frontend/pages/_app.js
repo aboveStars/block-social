@@ -4,6 +4,7 @@ import Head from "next/head"
 import React from "react"
 
 import { MoralisProvider } from "react-moralis"
+import { NotificationProvider } from "web3uikit"
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
@@ -23,12 +24,14 @@ export default function App({ Component, pageProps }) {
                     name="viewport"
                     content="width=device-width, initial-scale=1"
                 />
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="/icon.png" />
             </Head>
 
             <MoralisProvider initializeOnMount={false}>
                 <ApolloProvider client={apolloClient}>
-                    <Component {...pageProps} />
+                    <NotificationProvider>
+                        <Component {...pageProps} />
+                    </NotificationProvider>
                 </ApolloProvider>
             </MoralisProvider>
         </>
