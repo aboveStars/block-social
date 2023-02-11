@@ -1,8 +1,9 @@
 import { generateFinalURI } from "@/scripts/generateUri"
+import { approveOptions } from "@/utils/approveOptions"
 import { useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
-import { Loading, Stepper, useNotification } from "web3uikit"
+import { Loading, useNotification } from "web3uikit"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
@@ -53,13 +54,6 @@ export default function SendPostWorks() {
     }
 
     const { runContractFunction } = useWeb3Contract({})
-
-    const approveOptions = {
-        abi: "",
-        contractAddress: "",
-        functionName: "",
-        params: {},
-    }
 
     const sendPost = async (_uri) => {
         const _approveOptionsForSendNft = { ...approveOptions }

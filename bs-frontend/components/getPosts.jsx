@@ -1,11 +1,12 @@
 import { apolloClient } from "@/pages/_app"
-import { gqlCreatorForDesiredSenderAddress } from "@/subgraphQueries/graphQueries"
+import { approveOptions } from "@/utils/approveOptions"
+import { gqlCreatorForDesiredSenderAddress } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
 import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
-import { Skeleton, TextArea } from "web3uikit"
 import ReturnPosts from "./returnPosts"
+import ReturnSkeletons from "./returnSkeletons"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
@@ -31,6 +32,11 @@ export default function GetPosts() {
         [imagesArray, tokenIdImageUriArray]
     )
 
+    const memoReturnSkeletons = useMemo(
+        () => <ReturnSkeletons _length={4} />,
+        []
+    )
+
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
             setChainIdOk(true)
@@ -41,13 +47,6 @@ export default function GetPosts() {
     }, [chainId])
 
     const { runContractFunction } = useWeb3Contract({})
-
-    const approveOptions = {
-        abi: "",
-        contractAddress: "",
-        functionName: "",
-        params: {},
-    }
 
     const getTokenURI = async (_tokenId) => {
         const _approveOptionsForSendNft = { ...approveOptions }
@@ -210,89 +209,9 @@ export default function GetPosts() {
                         <div className="text-center">
                             <h1>Posts</h1>
                         </div>
-                        {showPosts == true ? (
-                            memoReturnPosts
-                        ) : (
-                            <>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        padding: "10px",
-                                        border: "1px solid",
-                                        borderRadius: "20px",
-                                        width: "250px",
-                                        gap: "5px",
-                                    }}
-                                    className="my-2"
-                                >
-                                    <Skeleton theme="image" />
-                                    <div
-                                        style={{
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                    >
-                                        <Skeleton theme="text" />
-                                        <Skeleton
-                                            theme="subtitle"
-                                            width="30%"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        padding: "10px",
-                                        border: "1px solid",
-                                        borderRadius: "20px",
-                                        width: "250px",
-                                        gap: "5px",
-                                    }}
-                                    className="my-2"
-                                >
-                                    <Skeleton theme="image" />
-                                    <div
-                                        style={{
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                    >
-                                        <Skeleton theme="text" />
-                                        <Skeleton
-                                            theme="subtitle"
-                                            width="30%"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        padding: "10px",
-                                        border: "1px solid",
-                                        borderRadius: "20px",
-                                        width: "250px",
-                                        gap: "5px",
-                                    }}
-                                    className="my-2"
-                                >
-                                    <Skeleton theme="image" />
-                                    <div
-                                        style={{
-                                            width: "100%",
-                                            height: "100%",
-                                        }}
-                                    >
-                                        <Skeleton theme="text" />
-                                        <Skeleton
-                                            theme="subtitle"
-                                            width="30%"
-                                        />
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                        {showPosts == true
+                            ? memoReturnPosts
+                            : memoReturnSkeletons}
                     </div>
                 </div>
             </>
