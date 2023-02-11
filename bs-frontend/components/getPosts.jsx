@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
 import { Skeleton, TextArea } from "web3uikit"
+import ReturnPosts from "./returnPosts"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
@@ -19,6 +20,16 @@ export default function GetPosts() {
     const [showPosts, setShowPosts] = useState(false)
 
     const [tokenIdImageUriArray, setTokenIdImageUriArray] = useState([])
+
+    const memoReturnPosts = useMemo(
+        () => (
+            <ReturnPosts
+                _imagesArray={imagesArray}
+                _tokenIdImageUriArray={tokenIdImageUriArray}
+            />
+        ),
+        [imagesArray, tokenIdImageUriArray]
+    )
 
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
@@ -200,48 +211,7 @@ export default function GetPosts() {
                             <h1>Posts</h1>
                         </div>
                         {showPosts == true ? (
-                            <>
-                                {console.log("we should see photos")}
-                                {imagesArray.map((imageSrc) => {
-                                    {
-                                        {
-                                            const tokenIdOfImage =
-                                                tokenIdImageUriArray[imageSrc]
-
-                                            const openSeaUrlForImage = `https://testnets.opensea.io/assets/goerli/0x6000c8c0c0e149a33ba62463b01134d9617269f6/${tokenIdOfImage}`
-                                            if (
-                                                typeof imageSrc !==
-                                                    "undefined" &&
-                                                imageSrc != null
-                                            ) {
-                                                return (
-                                                    <>
-                                                        <a
-                                                            href={
-                                                                openSeaUrlForImage
-                                                            }
-                                                            target="_blank"
-                                                        >
-                                                            <figure>
-                                                                <img
-                                                                    className="my-5"
-                                                                    src={
-                                                                        imageSrc
-                                                                    }
-                                                                    width="200"
-                                                                    height="200"
-                                                                />
-                                                                <figcaption>{`#${tokenIdOfImage}`}</figcaption>
-                                                            </figure>
-                                                        </a>
-                                                        <hr />
-                                                    </>
-                                                )
-                                            }
-                                        }
-                                    }
-                                })}
-                            </>
+                            memoReturnPosts
                         ) : (
                             <>
                                 <div
