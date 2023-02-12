@@ -1,5 +1,4 @@
 import { ConnectButton } from "web3uikit"
-import SendPostWorks from "@/components/sendPost"
 import GetPosts from "@/components/getPosts"
 import CreateButton from "@/components/createButton"
 
@@ -22,6 +21,18 @@ export default function Home() {
                 <div className="col-span-1 ml-auto">
                     <ConnectButton />
                 </div>
+            </div>
+            <div className="fixed bottom-5 right-5">
+                <a
+                    href="https://github.com/aboveStars/block-social"
+                    target="_blank"
+                >
+                    <img
+                        src="/github-mark-white.svg"
+                        className="w-9 h-9"
+                        title="Support me in GitHub"
+                    />
+                </a>
             </div>
         </div>
     )

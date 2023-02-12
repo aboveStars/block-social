@@ -1,6 +1,8 @@
+import { MdSell } from "react-icons/md"
+
 export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
     return (
-        <div className="h-96 overflow-y-scroll">
+        <div className="overflow-y-scroll h-96 my-5">
             {console.log("we should see photos")}
 
             {_imagesArray.map((imageSrc) => {
@@ -14,22 +16,21 @@ export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
                             imageSrc != null
                         ) {
                             return (
-                                <div key={imageSrc}>
-                                    <a
-                                        href={openSeaUrlForImage}
-                                        target="_blank"
-                                    >
-                                        <figure>
-                                            <img
-                                                className="my-5"
-                                                src={imageSrc}
-                                                width="400"
-                                                height="400"
-                                            />
-                                            <figcaption className="text-white">{`#${tokenIdOfImage}`}</figcaption>
-                                        </figure>
-                                    </a>
-                                    <hr />
+                                <div
+                                    key={imageSrc}
+                                    className="border border-gray-500"
+                                >
+                                    <img src={imageSrc} />
+                                    <div className="flex justify-center">
+                                        <button className="dark:text-white">
+                                            <a
+                                                href={openSeaUrlForImage}
+                                                target="_blank"
+                                            >
+                                                <MdSell size="50" />
+                                            </a>
+                                        </button>
+                                    </div>
                                 </div>
                             )
                         }

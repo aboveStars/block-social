@@ -89,7 +89,10 @@ export default function SendPostWorks() {
         <div>
             {showLoadingScreen == true ? (
                 <>
-                    <ReturnLoading _transactionHash={transactionHash} />
+                    <ReturnLoading
+                        _transactionHash={transactionHash}
+                        _forSendPost={true}
+                    />
                 </>
             ) : (
                 <>

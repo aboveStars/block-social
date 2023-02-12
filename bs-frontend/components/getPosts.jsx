@@ -5,6 +5,7 @@ import waitUntil from "@/utils/waitUntil"
 import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
+import ReturnLoading from "./returnLoading"
 import ReturnPosts from "./returnPosts"
 import ReturnSkeletons from "./returnSkeletons"
 
@@ -21,6 +22,8 @@ export default function GetPosts() {
     const [showPosts, setShowPosts] = useState(false)
 
     const [tokenIdImageUriArray, setTokenIdImageUriArray] = useState([])
+
+    const [showLoadingScreen, setShowLoadingScreen] = useState(false)
 
     const memoReturnPosts = useMemo(
         () => (
@@ -84,12 +87,15 @@ export default function GetPosts() {
     }
 
     async function handleClick() {
+        setShowLoadingScreen(true)
+        setShowPosts(false)
         console.log(
             "We are in 'handleClick' function \n WE will first check if chainId fetched..... "
         )
 
         if (chainIdOk == false) {
             console.error("ChainId is not fetched correctly")
+            setShowLoadingScreen(false)
             return
         } else {
             console.log("ChainId fetched correctly")
@@ -113,6 +119,7 @@ export default function GetPosts() {
 
         console.log("We are checking if any error happened !")
         if (error) {
+            setShowLoadingScreen(false)
             console.error(
                 "There is an error or errors when fetching data from theGraph"
             )
@@ -175,6 +182,7 @@ export default function GetPosts() {
         ) {
             setImagesArray(await Promise.all(imagesArrayF))
             setShowPosts(true)
+            setShowLoadingScreen(false)
         }
     }
 
@@ -245,9 +253,16 @@ export default function GetPosts() {
                     </form>
 
                     <div>
-                        {showPosts == true
-                            ? memoReturnPosts
-                            : memoReturnSkeletons}
+                        {showPosts == true ? (
+                            memoReturnPosts
+                        ) : showLoadingScreen == true ? (
+                            <ReturnLoading
+                                _transactionHash={null}
+                                _forSendPost={false}
+                            />
+                        ) : (
+                            memoReturnSkeletons
+                        )}
                     </div>
                 </div>
             </>
