@@ -33,7 +33,7 @@ export default function GetPosts() {
     )
 
     const memoReturnSkeletons = useMemo(
-        () => <ReturnSkeletons _length={4} />,
+        () => <ReturnSkeletons _length={3} />,
         []
     )
 
@@ -181,7 +181,7 @@ export default function GetPosts() {
     return (
         <div>
             <>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-5">
                     <form
                         className="flex items-center"
                         onSubmit={async (evt) => {
@@ -244,9 +244,7 @@ export default function GetPosts() {
                         </button>
                     </form>
 
-                    <div className="my-3">
-                        <h1 className="text-white">Posts</h1>
-
+                    <div>
                         {showPosts == true
                             ? memoReturnPosts
                             : memoReturnSkeletons}

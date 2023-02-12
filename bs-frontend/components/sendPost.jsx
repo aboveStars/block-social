@@ -3,13 +3,18 @@ import { approveOptions } from "@/utils/approveOptions"
 import { useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
-import { Loading, useNotification } from "web3uikit"
+import { useNotification } from "web3uikit"
 
 var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
 var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
 
+import { RiSendPlaneFill } from "react-icons/ri"
+import ReturnLoading from "./returnLoading"
+import CreateButton from "./createButton"
+
 export default function SendPostWorks() {
-    const [input, setInput] = useState("")
+    const [messageTitle, setMessageTitle] = useState("")
+    const [message, setMesage] = useState("")
     const [showLoadingScreen, setShowLoadingScreen] = useState(false)
     const [transactionHash, setTransactionHash] = useState(null)
 
@@ -84,57 +89,58 @@ export default function SendPostWorks() {
         <div>
             {showLoadingScreen == true ? (
                 <>
-                    <div
-                        style={{
-                            backgroundColor: "#ECECFE",
-                            borderRadius: "30px",
-                            padding: "30px",
-                        }}
-                    >
-                        <Loading
-                            size={50}
-                            spinnerColor="#2E7DAF"
-                            text={`Waiting for confirmations`}
-                        />
-                    </div>
-
-                    <div className="my-5 mx-10">
-                        <a
-                            href={`https://goerli.etherscan.io/tx/${transactionHash}`}
-                            target="_blank"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                        >
-                            View transaction on etherscan
-                        </a>
-                    </div>
+                    <ReturnLoading _transactionHash={transactionHash} />
                 </>
             ) : (
                 <>
-                    <div className="flex flex-col">
-                        <div className="relative mb-4">
-                            <textarea
-                                id="message"
-                                className="bg-white text-gray-900 rounded-lg py-2 px-4 block w-full appearance-none focus:outline-none focus:shadow-outline"
-                                placeholder="Enter your message here..."
-                                rows="4"
-                                onChange={(evt) => {
-                                    setInput(evt.target.value)
-                                }}
-                            ></textarea>
-                        </div>
+                    <div className="flex-col">
+                        <div className="w-64  text-white shadow-lg">
+                            <div>
+                                <label
+                                    htmlFor="small-input"
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                >
+                                    Title
+                                </label>
 
-                        <div className="w-64 p-6 bg-indigo-800 text-white shadow-lg">
+                                <input
+                                    type="text"
+                                    id="small-input"
+                                    className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    onChange={(evt) => {
+                                        setMessageTitle(evt.target.value)
+                                    }}
+                                />
+                            </div>
+                            <div className="my-4">
+                                <label
+                                    htmlFor="message"
+                                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                                >
+                                    Message
+                                </label>
+                                <textarea
+                                    id="message"
+                                    rows="4"
+                                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    onChange={(evt) => {
+                                        setMesage(evt.target.value)
+                                    }}
+                                ></textarea>
+                            </div>
+
                             <button
-                                className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded"
                                 onClick={async () => {
                                     await sendPost(
                                         await generateFinalURI(
-                                            input,
-                                            "Korkmaz's Post #53"
+                                            messageTitle,
+                                            message
                                         )
                                     )
                                 }}
+                                className="flex text-white gap-1 ml-auto"
                             >
+                                <RiSendPlaneFill size="25" />
                                 Send
                             </button>
                         </div>

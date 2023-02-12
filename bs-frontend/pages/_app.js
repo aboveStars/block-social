@@ -1,4 +1,6 @@
 import "@/styles/globals.css"
+import "@/styles/loadingStyle.css"
+
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client"
 import Head from "next/head"
 import React from "react"

@@ -13,7 +13,7 @@ const metaDataTemplate = {
 const svgPrefixForBase64 = "data:image/svg+xml;base64,"
 const jsonPrefixForBase64 = "data:application/json;base64,"
 
-async function generateFinalURI(_messageToSend, _name) {
+async function generateFinalURI(_title, _messageToSend) {
     const messageSvg = await generateMessageSVG(_messageToSend)
     const messageSvgString = messageSvg.toString()
 
@@ -24,7 +24,7 @@ async function generateFinalURI(_messageToSend, _name) {
 
     let _messageMetaData = { ...metaDataTemplate }
 
-    _messageMetaData.name = _name
+    _messageMetaData.name = _title
     _messageMetaData.description = _messageToSend
     _messageMetaData.attributes[0] = {
         trait_Type: "Impact",
