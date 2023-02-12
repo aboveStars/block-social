@@ -1,7 +1,8 @@
 export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
     return (
-        <>
+        <div className="h-96 overflow-y-scroll">
             {console.log("we should see photos")}
+
             {_imagesArray.map((imageSrc) => {
                 {
                     {
@@ -22,10 +23,10 @@ export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
                                             <img
                                                 className="my-5"
                                                 src={imageSrc}
-                                                width="200"
-                                                height="200"
+                                                width="400"
+                                                height="400"
                                             />
-                                            <figcaption>{`#${tokenIdOfImage}`}</figcaption>
+                                            <figcaption className="text-white">{`#${tokenIdOfImage}`}</figcaption>
                                         </figure>
                                     </a>
                                     <hr />
@@ -35,6 +36,6 @@ export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
                     }
                 }
             })}
-        </>
+        </div>
     )
 }
