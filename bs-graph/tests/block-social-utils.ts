@@ -3,9 +3,11 @@ import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts"
 import {
   Approval,
   ApprovalForAll,
+  Liked,
   MintingFinished,
   MintingRequestReceived,
-  Transfer
+  Transfer,
+  UnLiked
 } from "../generated/BlockSocial/BlockSocial"
 
 export function createApprovalEvent(
@@ -53,6 +55,37 @@ export function createApprovalForAllEvent(
   )
 
   return approvalForAllEvent
+}
+
+export function createLikedEvent(
+  whoDidLike: Address,
+  whichPostLiked: BigInt,
+  overallLikeCountOfPost: BigInt
+): Liked {
+  let likedEvent = changetype<Liked>(newMockEvent())
+
+  likedEvent.parameters = new Array()
+
+  likedEvent.parameters.push(
+    new ethereum.EventParam(
+      "whoDidLike",
+      ethereum.Value.fromAddress(whoDidLike)
+    )
+  )
+  likedEvent.parameters.push(
+    new ethereum.EventParam(
+      "whichPostLiked",
+      ethereum.Value.fromUnsignedBigInt(whichPostLiked)
+    )
+  )
+  likedEvent.parameters.push(
+    new ethereum.EventParam(
+      "overallLikeCountOfPost",
+      ethereum.Value.fromUnsignedBigInt(overallLikeCountOfPost)
+    )
+  )
+
+  return likedEvent
 }
 
 export function createMintingFinishedEvent(
@@ -136,4 +169,35 @@ export function createTransferEvent(
   )
 
   return transferEvent
+}
+
+export function createUnLikedEvent(
+  whoDidUnLike: Address,
+  whichPostUnLiked: BigInt,
+  overallLikeCountOfPost: BigInt
+): UnLiked {
+  let unLikedEvent = changetype<UnLiked>(newMockEvent())
+
+  unLikedEvent.parameters = new Array()
+
+  unLikedEvent.parameters.push(
+    new ethereum.EventParam(
+      "whoDidUnLike",
+      ethereum.Value.fromAddress(whoDidUnLike)
+    )
+  )
+  unLikedEvent.parameters.push(
+    new ethereum.EventParam(
+      "whichPostUnLiked",
+      ethereum.Value.fromUnsignedBigInt(whichPostUnLiked)
+    )
+  )
+  unLikedEvent.parameters.push(
+    new ethereum.EventParam(
+      "overallLikeCountOfPost",
+      ethereum.Value.fromUnsignedBigInt(overallLikeCountOfPost)
+    )
+  )
+
+  return unLikedEvent
 }

@@ -190,7 +190,7 @@ describe("BlockSocial", async function () {
         })
 
         describe("Is 'Like Count' being counted right ?", () => {
-            it("Is like count true for '1' user ?", async () => {
+            it("Is like count right for '1' user ?", async () => {
                 await new Promise(async (resolve, reject) => {
                     blockSocial.once("Liked", async () => {
                         try {
@@ -209,7 +209,7 @@ describe("BlockSocial", async function () {
                 })
             })
 
-            it("Is like count true for '2' user ?", async () => {
+            it("Is like count right for '2' user ?", async () => {
                 await new Promise(async (resolve, reject) => {
                     blockSocial.once("Liked", async () => {
                         resolve()
@@ -304,6 +304,57 @@ describe("BlockSocial", async function () {
                     reject(error)
                 }
             })
+        })
+    })
+
+    describe("Is 'tokenIdToWhoLiked' working right?", async () => {
+        beforeEach(async () => {
+            const txM = await blockSocial.minting("An Uri")
+            await txM.wait(1)
+
+            const tx = await blockSocial.like("0")
+            await tx.wait(1)
+        })
+
+        it("Is 'tokenIdToWhoLiked' working right when 'like' ?", async () => {
+            const likeStatus = await blockSocial.getIsThisPersonLikedThisPost(
+                "0",
+                "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" // I had to add manually...
+            )
+
+            assert.equal(likeStatus.toString(), "true")
+        })
+
+        it("Is 'tokenIdToWhoLiked' working right when 'unLike' ?", async () => {
+            await (await blockSocial.unLike("0")).wait(1)
+
+            const likeStatus = await blockSocial.getIsThisPersonLikedThisPost(
+                "0",
+                "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" // I had to add manually...
+            )
+
+            assert.equal(likeStatus.toString(), "false")
+        })
+
+        it("Is 'tokenIdToWhoLiked' working right when typed wrong address ?", async () => {
+            const likeStatus = await blockSocial.getIsThisPersonLikedThisPost(
+                "0",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+            )
+
+            assert.equal(likeStatus.toString(), "false")
+        })
+
+        it("Is 'tokenIdToWhoLiked' checks if tokenId valid ?", async () => {
+            await expect(
+                blockSocial.getIsThisPersonLikedThisPost(
+                    "1",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+                )
+            ).to.be.revertedWithCustomError(
+                blockSocial,
+                "BLockSocial_TokenIdNotExist"
+            )
         })
     })
 })

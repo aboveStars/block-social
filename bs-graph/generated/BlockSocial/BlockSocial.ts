@@ -62,6 +62,32 @@ export class ApprovalForAll__Params {
   }
 }
 
+export class Liked extends ethereum.Event {
+  get params(): Liked__Params {
+    return new Liked__Params(this);
+  }
+}
+
+export class Liked__Params {
+  _event: Liked;
+
+  constructor(event: Liked) {
+    this._event = event;
+  }
+
+  get whoDidLike(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get whichPostLiked(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get overallLikeCountOfPost(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class MintingFinished extends ethereum.Event {
   get params(): MintingFinished__Params {
     return new MintingFinished__Params(this);
@@ -140,6 +166,32 @@ export class Transfer__Params {
   }
 }
 
+export class UnLiked extends ethereum.Event {
+  get params(): UnLiked__Params {
+    return new UnLiked__Params(this);
+  }
+}
+
+export class UnLiked__Params {
+  _event: UnLiked;
+
+  constructor(event: UnLiked) {
+    this._event = event;
+  }
+
+  get whoDidUnLike(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get whichPostUnLiked(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get overallLikeCountOfPost(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class BlockSocial extends ethereum.SmartContract {
   static bind(address: Address): BlockSocial {
     return new BlockSocial("BlockSocial", address);
@@ -183,6 +235,27 @@ export class BlockSocial extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  getLikeCount(_tokenId: BigInt): BigInt {
+    let result = super.call("getLikeCount", "getLikeCount(uint256):(uint256)", [
+      ethereum.Value.fromUnsignedBigInt(_tokenId)
+    ]);
+
+    return result[0].toBigInt();
+  }
+
+  try_getLikeCount(_tokenId: BigInt): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "getLikeCount",
+      "getLikeCount(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(_tokenId)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
   getTokenCount(): BigInt {
@@ -281,6 +354,61 @@ export class BlockSocial extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  s_tokenIdToLikeCount(param0: BigInt): BigInt {
+    let result = super.call(
+      "s_tokenIdToLikeCount",
+      "s_tokenIdToLikeCount(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(param0)]
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_s_tokenIdToLikeCount(param0: BigInt): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "s_tokenIdToLikeCount",
+      "s_tokenIdToLikeCount(uint256):(uint256)",
+      [ethereum.Value.fromUnsignedBigInt(param0)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  s_tokenIdToWhoLiked(param0: BigInt, param1: Address): boolean {
+    let result = super.call(
+      "s_tokenIdToWhoLiked",
+      "s_tokenIdToWhoLiked(uint256,address):(bool)",
+      [
+        ethereum.Value.fromUnsignedBigInt(param0),
+        ethereum.Value.fromAddress(param1)
+      ]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_s_tokenIdToWhoLiked(
+    param0: BigInt,
+    param1: Address
+  ): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "s_tokenIdToWhoLiked",
+      "s_tokenIdToWhoLiked(uint256,address):(bool)",
+      [
+        ethereum.Value.fromUnsignedBigInt(param0),
+        ethereum.Value.fromAddress(param1)
+      ]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   supportsInterface(interfaceId: Bytes): boolean {
@@ -397,6 +525,36 @@ export class ApproveCall__Outputs {
   _call: ApproveCall;
 
   constructor(call: ApproveCall) {
+    this._call = call;
+  }
+}
+
+export class LikeCall extends ethereum.Call {
+  get inputs(): LikeCall__Inputs {
+    return new LikeCall__Inputs(this);
+  }
+
+  get outputs(): LikeCall__Outputs {
+    return new LikeCall__Outputs(this);
+  }
+}
+
+export class LikeCall__Inputs {
+  _call: LikeCall;
+
+  constructor(call: LikeCall) {
+    this._call = call;
+  }
+
+  get _tokenId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class LikeCall__Outputs {
+  _call: LikeCall;
+
+  constructor(call: LikeCall) {
     this._call = call;
   }
 }
@@ -579,6 +737,36 @@ export class TransferFromCall__Outputs {
   _call: TransferFromCall;
 
   constructor(call: TransferFromCall) {
+    this._call = call;
+  }
+}
+
+export class UnLikeCall extends ethereum.Call {
+  get inputs(): UnLikeCall__Inputs {
+    return new UnLikeCall__Inputs(this);
+  }
+
+  get outputs(): UnLikeCall__Outputs {
+    return new UnLikeCall__Outputs(this);
+  }
+}
+
+export class UnLikeCall__Inputs {
+  _call: UnLikeCall;
+
+  constructor(call: UnLikeCall) {
+    this._call = call;
+  }
+
+  get _tokenId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class UnLikeCall__Outputs {
+  _call: UnLikeCall;
+
+  constructor(call: UnLikeCall) {
     this._call = call;
   }
 }

@@ -185,6 +185,92 @@ export class ApprovalForAll extends Entity {
   }
 }
 
+export class Liked extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Liked entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type Liked must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("Liked", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static load(id: Bytes): Liked | null {
+    return changetype<Liked | null>(store.get("Liked", id.toHexString()));
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get whoDidLike(): Bytes {
+    let value = this.get("whoDidLike");
+    return value!.toBytes();
+  }
+
+  set whoDidLike(value: Bytes) {
+    this.set("whoDidLike", Value.fromBytes(value));
+  }
+
+  get whichPostLiked(): BigInt {
+    let value = this.get("whichPostLiked");
+    return value!.toBigInt();
+  }
+
+  set whichPostLiked(value: BigInt) {
+    this.set("whichPostLiked", Value.fromBigInt(value));
+  }
+
+  get overallLikeCountOfPost(): BigInt {
+    let value = this.get("overallLikeCountOfPost");
+    return value!.toBigInt();
+  }
+
+  set overallLikeCountOfPost(value: BigInt) {
+    this.set("overallLikeCountOfPost", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
 export class MintingFinished extends Entity {
   constructor(id: Bytes) {
     super();
@@ -420,6 +506,92 @@ export class Transfer extends Entity {
 
   set tokenId(value: BigInt) {
     this.set("tokenId", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
+export class UnLiked extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save UnLiked entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type UnLiked must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("UnLiked", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static load(id: Bytes): UnLiked | null {
+    return changetype<UnLiked | null>(store.get("UnLiked", id.toHexString()));
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get whoDidUnLike(): Bytes {
+    let value = this.get("whoDidUnLike");
+    return value!.toBytes();
+  }
+
+  set whoDidUnLike(value: Bytes) {
+    this.set("whoDidUnLike", Value.fromBytes(value));
+  }
+
+  get whichPostUnLiked(): BigInt {
+    let value = this.get("whichPostUnLiked");
+    return value!.toBigInt();
+  }
+
+  set whichPostUnLiked(value: BigInt) {
+    this.set("whichPostUnLiked", Value.fromBigInt(value));
+  }
+
+  get overallLikeCountOfPost(): BigInt {
+    let value = this.get("overallLikeCountOfPost");
+    return value!.toBigInt();
+  }
+
+  set overallLikeCountOfPost(value: BigInt) {
+    this.set("overallLikeCountOfPost", Value.fromBigInt(value));
   }
 
   get blockNumber(): BigInt {

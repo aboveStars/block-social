@@ -18,6 +18,16 @@ type ApprovalForAll @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type Liked @entity(immutable: true) {
+  id: Bytes!
+  whoDidLike: Bytes! # address
+  whichPostLiked: BigInt! # uint256
+  overallLikeCountOfPost: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type MintingFinished @entity(immutable: true) {
   id: Bytes!
   from: Bytes! # address
@@ -43,6 +53,16 @@ type Transfer @entity(immutable: true) {
   from: Bytes! # address
   to: Bytes! # address
   tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UnLiked @entity(immutable: true) {
+  id: Bytes!
+  whoDidUnLike: Bytes! # address
+  whichPostUnLiked: BigInt! # uint256
+  overallLikeCountOfPost: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

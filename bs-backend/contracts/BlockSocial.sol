@@ -98,4 +98,14 @@ contract BlockSocial is ERC721URIStorage {
     ) public view returns (uint256 likeCount) {
         likeCount = s_tokenIdToLikeCount[_tokenId];
     }
+
+    function getIsThisPersonLikedThisPost(
+        uint256 _tokenId,
+        address _personAddress
+    ) public view returns (bool) {
+        if (_tokenId > s_tokenCounter - 1) {
+            revert BLockSocial_TokenIdNotExist();
+        }
+        return s_tokenIdToWhoLiked[_tokenId][_personAddress];
+    }
 }

@@ -5,6 +5,21 @@
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "BLockSocial_TokenIdNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BlockSocial_AlreadyLiked",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BlockSocial_DidNotEvenLiked",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -52,6 +67,31 @@
       }
     ],
     "name": "ApprovalForAll",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "whoDidLike",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "whichPostLiked",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "overallLikeCountOfPost",
+        "type": "uint256"
+      }
+    ],
+    "name": "Liked",
     "type": "event"
   },
   {
@@ -130,6 +170,31 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "whoDidUnLike",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "whichPostUnLiked",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "overallLikeCountOfPost",
+        "type": "uint256"
+      }
+    ],
+    "name": "UnLiked",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -186,6 +251,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getLikeCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "likeCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getTokenCount",
     "outputs": [
@@ -220,6 +304,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "like",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -275,6 +372,49 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "s_tokenIdToLikeCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "s_tokenIdToWhoLiked",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -419,6 +559,19 @@
       }
     ],
     "name": "transferFrom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "unLike",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

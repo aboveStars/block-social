@@ -1,5 +1,9 @@
 import { apolloClient } from "@/pages/_app"
-import { approveOptions } from "@/utils/approveOptions"
+import {
+    approveOptions,
+    blockSocialAbi,
+    contractNetworkInformations,
+} from "@/utils/approveOptions"
 import { gqlCreatorForDesiredSenderAddress } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
 import { useEffect, useMemo, useState } from "react"
@@ -8,9 +12,6 @@ import Web3 from "web3"
 import ReturnLoading from "./returnLoading"
 import ReturnPosts from "./returnPosts"
 import ReturnSkeletons from "./returnSkeletons"
-
-var blockSocialAbi = require("../contractInformations/BlockSocial_ABI.json")
-var contractNetworkInformations = require("../contractInformations/BlockSocial_Network.json")
 
 export default function GetPosts() {
     const { chainId } = useMoralis()

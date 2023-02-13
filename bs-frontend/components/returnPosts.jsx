@@ -1,4 +1,4 @@
-import { MdSell } from "react-icons/md"
+import PostBottomPart from "./postsBottomPart"
 
 export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
     return (
@@ -21,16 +21,11 @@ export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
                                     className="border border-gray-500"
                                 >
                                     <img src={imageSrc} />
-                                    <div className="flex justify-center">
-                                        <button className="dark:text-white">
-                                            <a
-                                                href={openSeaUrlForImage}
-                                                target="_blank"
-                                            >
-                                                <MdSell size="50" />
-                                            </a>
-                                        </button>
-                                    </div>
+
+                                    <PostBottomPart
+                                        _openSeaUrlForImage={openSeaUrlForImage}
+                                        _tokenId={tokenIdOfImage}
+                                    />
                                 </div>
                             )
                         }
