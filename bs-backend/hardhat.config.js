@@ -44,10 +44,10 @@ module.exports = {
     },
     namedAccounts: {
         deployer: {
-            default: 0,
+            default: 0, // x =  ethers.getSigners() ======>  x[0] = defafult // 0x....
         },
         user: {
-            default: 1,
+            default: 1, // x =  ethers.getSigners() ======>  x[1] = user // 0x....
         },
     },
     mocha: {

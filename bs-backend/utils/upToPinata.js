@@ -19,7 +19,6 @@ async function generateMessageSvg(_messageToSend) {
     }
 
     const svg = textToSVG.getSVG(_messageToSend, options)
-    console.log(svg)
     return svg
 }
 

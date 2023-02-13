@@ -14,8 +14,6 @@ async function updateContractNetworkInformations(_contractName, _chainId) {
         await ethers.getContract(_contractName)
     ).address.toString()
 
-    console.log(`${contractName} ****** ${chainId} *** ${contractAddress}`)
-
     const existingFile = JSON.parse(
         fs.readFileSync(locationOfNetworkConstants, "utf-8")
     )

@@ -1,15 +1,12 @@
 const { deployments, ethers, getNamedAccounts } = require("hardhat")
-const { assert } = require("chai")
+const { assert, expect } = require("chai")
 const { postToIpfs } = require("../utils/ipfsPosting")
 
 describe("BlockSocial", async function () {
     let blockSocial
-    let deployer
+
     beforeEach(async function () {
         /** Contract Deploying... */
-        const namedAccounts = await getNamedAccounts()
-        deployer = namedAccounts.deployer
-
         await deployments.fixture(["all"])
         blockSocial = await ethers.getContract("BlockSocial")
     })
@@ -153,6 +150,159 @@ describe("BlockSocial", async function () {
                 const metaUri = await postToIpfs("1881", false)
                 const tx = await blockSocial.minting(metaUri)
                 await tx.wait(1)
+            })
+        })
+    })
+
+    describe("Like System Working Right", () => {
+        beforeEach(async function () {
+            /** NFT MINTING */
+            const tx = await blockSocial.minting("An Uri")
+            await tx.wait(1)
+        })
+
+        it("Is 'tokenId' valid ?", async () => {
+            await expect(blockSocial.like("1")).to.be.revertedWithCustomError(
+                blockSocial,
+                "BLockSocial_TokenIdNotExist"
+            )
+        })
+
+        it("Is 'Like System' being secured against to 'reLike'", async () => {
+            await new Promise(async (resolve, reject) => {
+                blockSocial.once("Liked", async () => {
+                    try {
+                        await expect(
+                            blockSocial.like("0")
+                        ).to.be.revertedWithCustomError(
+                            blockSocial,
+                            "BlockSocial_AlreadyLiked"
+                        )
+                    } catch (error) {
+                        reject(error)
+                    }
+                    resolve()
+                })
+
+                const tx = await blockSocial.like("0")
+                await tx.wait(1)
+            })
+        })
+
+        describe("Is 'Like Count' being counted right ?", () => {
+            it("Is like count true for '1' user ?", async () => {
+                await new Promise(async (resolve, reject) => {
+                    blockSocial.once("Liked", async () => {
+                        try {
+                            const likeCount = await blockSocial.getLikeCount(
+                                "0"
+                            )
+                            assert.equal(likeCount, "1")
+                        } catch (error) {
+                            reject(error)
+                        }
+                        resolve()
+                    })
+
+                    const tx = await blockSocial.like("0")
+                    await tx.wait(1)
+                })
+            })
+
+            it("Is like count true for '2' user ?", async () => {
+                await new Promise(async (resolve, reject) => {
+                    blockSocial.once("Liked", async () => {
+                        resolve()
+                    })
+
+                    const tx = await blockSocial.like("0")
+                    await tx.wait(1)
+                })
+
+                await new Promise(async (resolve, reject) => {
+                    blockSocial.once("Liked", async () => {
+                        try {
+                            const likeCount = await blockSocial.getLikeCount(
+                                "0"
+                            )
+                            assert.equal(likeCount, "2")
+                        } catch (error) {
+                            reject(error)
+                        }
+                        resolve()
+                    })
+
+                    const accounts = await ethers.getSigners()
+                    const blockSocialForOtherAccount =
+                        await blockSocial.connect(accounts[1])
+
+                    try {
+                        const tx = await blockSocialForOtherAccount.like("0")
+                        await tx.wait(1)
+                    } catch (error) {
+                        reject(error)
+                    }
+                })
+            })
+        })
+    })
+
+    describe("UnLike System Working Right", () => {
+        beforeEach(async function () {
+            /** NFT MINTING */
+            const txM = await blockSocial.minting("An Uri")
+            await txM.wait(1)
+        })
+
+        it("Is 'tokenId' valid ?", async () => {
+            const txL = await blockSocial.like("0")
+            await txL.wait(1)
+
+            await expect(blockSocial.unLike("1")).to.be.revertedWithCustomError(
+                blockSocial,
+                "BLockSocial_TokenIdNotExist"
+            )
+        })
+
+        it("Is 'unLike' System secured for 'unlikes' even not 'liked'", async () => {
+            await expect(blockSocial.unLike("0")).to.be.revertedWithCustomError(
+                blockSocial,
+                "BlockSocial_DidNotEvenLiked"
+            )
+        })
+
+        it("Is 'tokenId count' true after 'unlike' ", async () => {
+            const txL = await blockSocial.like("0")
+            await txL.wait(1)
+
+            const txL2 = await blockSocial
+                .connect((await ethers.getSigners())[1])
+                .like("0")
+
+            await txL2.wait(1)
+
+            const likedCount = await blockSocial.getLikeCount("0")
+            const expectedCountAfterUnLike = Number(likedCount) - 1
+
+            await new Promise(async (resolve, reject) => {
+                blockSocial.once("UnLiked", async () => {
+                    try {
+                        const updatedCount = await blockSocial.getLikeCount("0")
+                        assert.equal(
+                            updatedCount,
+                            expectedCountAfterUnLike.toString()
+                        )
+                    } catch (error) {
+                        reject(error)
+                    }
+                    resolve()
+                })
+
+                try {
+                    await (await blockSocial.unLike("0")).wait(1)
+                } catch (error) {
+                    reject(error)
+                }
             })
         })
     })
