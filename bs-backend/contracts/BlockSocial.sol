@@ -38,11 +38,17 @@ contract BlockSocial is ERC721URIStorage {
         uint256 indexed overallLikeCountOfPost
     );
 
+    event CommentMinted(
+        uint256 indexed commentToTokenId,
+        address from,
+        uint256 indexed commentTokenId
+    );
+
     constructor() ERC721("BlockSocial", "BS") {
         s_tokenCounter = 0;
     }
 
-    function minting(string memory _uri) public {
+    function mintingPost(string memory _uri) public {
         emit MintingRequestReceived(msg.sender, s_tokenCounter, address(this));
 
         _safeMint(msg.sender, s_tokenCounter);
@@ -87,6 +93,16 @@ contract BlockSocial is ERC721URIStorage {
         s_tokenIdToLikeCount[_tokenId] = updatedLikeCount;
 
         emit UnLiked(msg.sender, _tokenId, updatedLikeCount);
+    }
+
+    function mintComment(uint256 _tokenIdToComment, string memory _uri) public {
+        if (_tokenIdToComment > s_tokenCounter - 1) {
+            revert BLockSocial_TokenIdNotExist();
+        }
+        _safeMint(msg.sender, s_tokenCounter);
+        _setTokenURI(s_tokenCounter, _uri);
+        emit CommentMinted(_tokenIdToComment, msg.sender, s_tokenCounter);
+        s_tokenCounter += 1;
     }
 
     function getTokenCount() public view returns (uint256 tokenCount) {

@@ -11,14 +11,14 @@ describe("BlockSocial", async function () {
         blockSocial = await ethers.getContract("BlockSocial")
     })
 
-    describe("Is Minting Events working ?", () => {
+    describe("Is mintingPost Events working ?", () => {
         it("Has 'MintingRequestReceived' been emitted ? ", async function () {
             await new Promise(async (resolve, reject) => {
                 blockSocial.once("MintingRequestReceived", async () => {
                     resolve()
                 })
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
@@ -29,7 +29,7 @@ describe("BlockSocial", async function () {
                     resolve()
                 })
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
@@ -45,7 +45,7 @@ describe("BlockSocial", async function () {
             }
         })
 
-        it("Will 'Token Count' be 1 after minting", async () => {
+        it("Will 'Token Count' be 1 after mintingPost", async () => {
             await new Promise(async (resolve, reject) => {
                 blockSocial.once("MintingFinished", async () => {
                     const tokenCount = await blockSocial.getTokenCount()
@@ -58,19 +58,19 @@ describe("BlockSocial", async function () {
                 })
 
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
 
-        it("Will 'Token Count' be 2 after 2 minting", async () => {
+        it("Will 'Token Count' be 2 after 2 mintingPost", async () => {
             await new Promise(async (resolve, reject) => {
                 blockSocial.once("MintingFinished", async () => {
                     resolve()
                 })
 
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
 
@@ -86,14 +86,14 @@ describe("BlockSocial", async function () {
                 })
 
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
     })
 
     describe("Is 'tokenURI' right ?", () => {
-        it("Is 'tokenURI' rigth for minting 1 NFT", async () => {
+        it("Is 'tokenURI' rigth for mintingPost 1 NFT", async () => {
             await new Promise(async (resolve, reject) => {
                 blockSocial.once("MintingFinished", async () => {
                     let tokenUri
@@ -113,19 +113,19 @@ describe("BlockSocial", async function () {
                 })
 
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
 
-        it("Is 'tokenURI' rigth for minting 2 NFT", async () => {
+        it("Is 'tokenURI' rigth for mintingPost 2 NFT", async () => {
             await new Promise(async (resolve, reject) => {
                 blockSocial.once("MintingFinished", async () => {
                     resolve()
                 })
 
                 const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
 
@@ -148,7 +148,7 @@ describe("BlockSocial", async function () {
                 })
 
                 const metaUri = await postToIpfs("1881", false)
-                const tx = await blockSocial.minting(metaUri)
+                const tx = await blockSocial.mintingPost(metaUri)
                 await tx.wait(1)
             })
         })
@@ -156,8 +156,8 @@ describe("BlockSocial", async function () {
 
     describe("Like System Working Right", () => {
         beforeEach(async function () {
-            /** NFT MINTING */
-            const tx = await blockSocial.minting("An Uri")
+            /** NFT mintingPost */
+            const tx = await blockSocial.mintingPost("An Uri")
             await tx.wait(1)
         })
 
@@ -249,8 +249,8 @@ describe("BlockSocial", async function () {
 
     describe("UnLike System Working Right", () => {
         beforeEach(async function () {
-            /** NFT MINTING */
-            const txM = await blockSocial.minting("An Uri")
+            /** NFT mintingPost */
+            const txM = await blockSocial.mintingPost("An Uri")
             await txM.wait(1)
         })
 
@@ -309,7 +309,7 @@ describe("BlockSocial", async function () {
 
     describe("Is 'tokenIdToWhoLiked' working right?", async () => {
         beforeEach(async () => {
-            const txM = await blockSocial.minting("An Uri")
+            const txM = await blockSocial.mintingPost("An Uri")
             await txM.wait(1)
 
             const tx = await blockSocial.like("0")
@@ -355,6 +355,44 @@ describe("BlockSocial", async function () {
                 blockSocial,
                 "BLockSocial_TokenIdNotExist"
             )
+        })
+    })
+
+    describe("Is 'comment' working right", () => {
+        beforeEach(async () => {
+            const txM = await blockSocial.mintingPost("An Uri")
+            await txM.wait(1)
+        })
+
+        it("Is 'tokenID' valid ?", async () => {
+            await expect(
+                blockSocial.mintComment("1", "example comment uri")
+            ).to.be.revertedWithCustomError(
+                blockSocial,
+                "BLockSocial_TokenIdNotExist"
+            )
+        })
+
+        it("Is 'mintingComment' minting right ? ", async () => {
+            await new Promise(async (resolve, reject) => {
+                let tokenIdOfComment
+                blockSocial.once("CommentMinted", async () => {
+                    try {
+                        const fecthedTokenUri = await blockSocial.tokenURI("1")
+                        assert.equal(fecthedTokenUri.toString(), "segageso")
+                    } catch (error) {
+                        reject(error)
+                    }
+                    resolve()
+                })
+
+                try {
+                    const tx = await blockSocial.mintComment("0", "segageso")
+                    await tx.wait(1)
+                } catch (error) {
+                    reject(error)
+                }
+            })
         })
     })
 })
