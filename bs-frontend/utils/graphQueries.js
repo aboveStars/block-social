@@ -31,8 +31,21 @@ function gqlCreatorForDesiredSenderAddress(_desiredSenderAddress) {
     `
 }
 
+function gqlCreatorForDesiredTokenIdToComment(_desiredTokenId) {
+    return gql`
+        {
+            commentMinteds(where: { commentToTokenId: "${_desiredTokenId}" }) {
+                commentTokenId
+                from
+                
+            }
+        }
+    `
+}
+
 module.exports = {
     getPostQuery,
     gqlCreatorForDesiredNftAddress,
     gqlCreatorForDesiredSenderAddress,
+    gqlCreatorForDesiredTokenIdToComment,
 }

@@ -1,6 +1,6 @@
 import { generateFinalURI } from "@/scripts/generateUri"
 import { approveOptions } from "@/utils/approveOptions"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
 import { useNotification } from "web3uikit"
@@ -11,7 +11,6 @@ var contractNetworkInformations = require("../contractInformations/BlockSocial_N
 import { RiSendPlaneFill } from "react-icons/ri"
 import ReturnLoading from "./returnLoading"
 
-
 export default function SendPostWorks() {
     const [messageTitle, setMessageTitle] = useState("")
     const [message, setMesage] = useState("")
@@ -20,7 +19,19 @@ export default function SendPostWorks() {
 
     const { chainId } = useMoralis()
 
+    const [smartContractAddress, setSmartContractAddress] = useState("")
+
     const dispatch = useNotification()
+
+    useEffect(() => {
+        if (chainId) {
+            setSmartContractAddress(
+                contractNetworkInformations["BlockSocial"][
+                    Web3.utils.hexToNumberString(chainId)
+                ]
+            )
+        }
+    }, [chainId])
 
     async function handleApproveSuccess(tx) {
         handleNewNotification(
@@ -64,14 +75,11 @@ export default function SendPostWorks() {
         const _approveOptionsForSendNft = { ...approveOptions }
         _approveOptionsForSendNft.abi = blockSocialAbi
         if (chainId) {
-            _approveOptionsForSendNft.contractAddress =
-                contractNetworkInformations["BlockSocial"][
-                    Web3.utils.hexToNumberString(chainId)
-                ]
+            _approveOptionsForSendNft.contractAddress = smartContractAddress
         } else {
             console.error("ChainID not approprite")
         }
-        _approveOptionsForSendNft.functionName = "minting"
+        _approveOptionsForSendNft.functionName = "mintingPost"
         _approveOptionsForSendNft.params = {
             _uri: _uri,
         }

@@ -26,11 +26,14 @@ export default function GetPosts() {
 
     const [showLoadingScreen, setShowLoadingScreen] = useState(false)
 
+    const [smartContractAddress, setSmartContractAddress] = useState("")
+
     const memoReturnPosts = useMemo(
         () => (
             <ReturnPosts
                 _imagesArray={imagesArray}
                 _tokenIdImageUriArray={tokenIdImageUriArray}
+                _smartContractAddressForOpenSea={smartContractAddress}
             />
         ),
         [imagesArray, tokenIdImageUriArray]
@@ -43,6 +46,11 @@ export default function GetPosts() {
 
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
+            setSmartContractAddress(
+                contractNetworkInformations["BlockSocial"][
+                    Web3.utils.hexToNumberString(chainId)
+                ]
+            )
             setChainIdOk(true)
             console.log(
                 "ChainID changed: " + Web3.utils.hexToNumberString(chainId)
@@ -53,21 +61,17 @@ export default function GetPosts() {
     const { runContractFunction } = useWeb3Contract({})
 
     const getTokenURI = async (_tokenId) => {
-        const _approveOptionsForSendNft = { ...approveOptions }
-        _approveOptionsForSendNft.abi = blockSocialAbi
+        const _approveOptionsForGettingUri = { ...approveOptions }
+        _approveOptionsForGettingUri.abi = blockSocialAbi
 
-        _approveOptionsForSendNft.contractAddress =
-            contractNetworkInformations["BlockSocial"][
-                Web3.utils.hexToNumberString(chainId)
-            ]
-
-        _approveOptionsForSendNft.functionName = "tokenURI"
-        _approveOptionsForSendNft.params = {
+        _approveOptionsForGettingUri.contractAddress = smartContractAddress
+        _approveOptionsForGettingUri.functionName = "tokenURI"
+        _approveOptionsForGettingUri.params = {
             tokenId: _tokenId,
         }
 
         const resultTokenId = await runContractFunction({
-            params: _approveOptionsForSendNft,
+            params: _approveOptionsForGettingUri,
             onError: (error) => {
                 console.error(error)
             },

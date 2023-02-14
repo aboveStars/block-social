@@ -3,12 +3,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum
-    name: BlockSocial
+    name: blockSocial
     network: goerli
     source:
-      address: "0xC1f6818129f8791d35516a0FFD4eF8B586A6862D"
-      abi: BlockSocial
-      startBlock: 8486471
+      address: "0x78084bf8FAE05b298677B7079eAa051256eFD90D"
+      abi: blockSocial
+      startBlock: 8490134
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -16,19 +16,22 @@ dataSources:
       entities:
         - Approval
         - ApprovalForAll
+        - CommentMinted
         - Liked
         - MintingFinished
         - MintingRequestReceived
         - Transfer
         - UnLiked
       abis:
-        - name: BlockSocial
-          file: ./abis/BlockSocial.json
+        - name: blockSocial
+          file: ./abis/blockSocial.json
       eventHandlers:
         - event: Approval(indexed address,indexed address,indexed uint256)
           handler: handleApproval
         - event: ApprovalForAll(indexed address,indexed address,bool)
           handler: handleApprovalForAll
+        - event: CommentMinted(indexed uint256,address,indexed uint256)
+          handler: handleCommentMinted
         - event: Liked(indexed address,indexed uint256,indexed uint256)
           handler: handleLiked
         - event: MintingFinished(indexed address,indexed uint256,indexed address)

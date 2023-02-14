@@ -62,6 +62,32 @@ export class ApprovalForAll__Params {
   }
 }
 
+export class CommentMinted extends ethereum.Event {
+  get params(): CommentMinted__Params {
+    return new CommentMinted__Params(this);
+  }
+}
+
+export class CommentMinted__Params {
+  _event: CommentMinted;
+
+  constructor(event: CommentMinted) {
+    this._event = event;
+  }
+
+  get commentToTokenId(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get from(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get commentTokenId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class Liked extends ethereum.Event {
   get params(): Liked__Params {
     return new Liked__Params(this);
@@ -192,9 +218,9 @@ export class UnLiked__Params {
   }
 }
 
-export class BlockSocial extends ethereum.SmartContract {
-  static bind(address: Address): BlockSocial {
-    return new BlockSocial("BlockSocial", address);
+export class blockSocial extends ethereum.SmartContract {
+  static bind(address: Address): blockSocial {
+    return new blockSocial("blockSocial", address);
   }
 
   balanceOf(owner: Address): BigInt {
@@ -235,6 +261,41 @@ export class BlockSocial extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  getIsThisPersonLikedThisPost(
+    _tokenId: BigInt,
+    _personAddress: Address
+  ): boolean {
+    let result = super.call(
+      "getIsThisPersonLikedThisPost",
+      "getIsThisPersonLikedThisPost(uint256,address):(bool)",
+      [
+        ethereum.Value.fromUnsignedBigInt(_tokenId),
+        ethereum.Value.fromAddress(_personAddress)
+      ]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_getIsThisPersonLikedThisPost(
+    _tokenId: BigInt,
+    _personAddress: Address
+  ): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "getIsThisPersonLikedThisPost",
+      "getIsThisPersonLikedThisPost(uint256,address):(bool)",
+      [
+        ethereum.Value.fromUnsignedBigInt(_tokenId),
+        ethereum.Value.fromAddress(_personAddress)
+      ]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   getLikeCount(_tokenId: BigInt): BigInt {
@@ -559,20 +620,54 @@ export class LikeCall__Outputs {
   }
 }
 
-export class MintingCall extends ethereum.Call {
-  get inputs(): MintingCall__Inputs {
-    return new MintingCall__Inputs(this);
+export class MintCommentCall extends ethereum.Call {
+  get inputs(): MintCommentCall__Inputs {
+    return new MintCommentCall__Inputs(this);
   }
 
-  get outputs(): MintingCall__Outputs {
-    return new MintingCall__Outputs(this);
+  get outputs(): MintCommentCall__Outputs {
+    return new MintCommentCall__Outputs(this);
   }
 }
 
-export class MintingCall__Inputs {
-  _call: MintingCall;
+export class MintCommentCall__Inputs {
+  _call: MintCommentCall;
 
-  constructor(call: MintingCall) {
+  constructor(call: MintCommentCall) {
+    this._call = call;
+  }
+
+  get _tokenIdToComment(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get _uri(): string {
+    return this._call.inputValues[1].value.toString();
+  }
+}
+
+export class MintCommentCall__Outputs {
+  _call: MintCommentCall;
+
+  constructor(call: MintCommentCall) {
+    this._call = call;
+  }
+}
+
+export class MintingPostCall extends ethereum.Call {
+  get inputs(): MintingPostCall__Inputs {
+    return new MintingPostCall__Inputs(this);
+  }
+
+  get outputs(): MintingPostCall__Outputs {
+    return new MintingPostCall__Outputs(this);
+  }
+}
+
+export class MintingPostCall__Inputs {
+  _call: MintingPostCall;
+
+  constructor(call: MintingPostCall) {
     this._call = call;
   }
 
@@ -581,10 +676,10 @@ export class MintingCall__Inputs {
   }
 }
 
-export class MintingCall__Outputs {
-  _call: MintingCall;
+export class MintingPostCall__Outputs {
+  _call: MintingPostCall;
 
-  constructor(call: MintingCall) {
+  constructor(call: MintingPostCall) {
     this._call = call;
   }
 }

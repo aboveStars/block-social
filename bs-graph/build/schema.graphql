@@ -18,6 +18,16 @@ type ApprovalForAll @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
+type CommentMinted @entity(immutable: true) {
+  id: Bytes!
+  commentToTokenId: BigInt! # uint256
+  from: Bytes! # address
+  commentTokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
 type Liked @entity(immutable: true) {
   id: Bytes!
   whoDidLike: Bytes! # address

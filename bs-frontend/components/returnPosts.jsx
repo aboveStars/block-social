@@ -1,6 +1,6 @@
 import PostBottomPart from "./postsBottomPart"
 
-export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
+export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray, _smartContractAddressForOpenSea }) {
     return (
         <div className="overflow-y-scroll h-96 my-5">
             {console.log("we should see photos")}
@@ -10,7 +10,7 @@ export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray }) {
                     {
                         const tokenIdOfImage = _tokenIdImageUriArray[imageSrc]
 
-                        const openSeaUrlForImage = `https://testnets.opensea.io/assets/goerli/0x6000c8c0c0e149a33ba62463b01134d9617269f6/${tokenIdOfImage}`
+                        const openSeaUrlForImage = `https://testnets.opensea.io/assets/goerli/${_smartContractAddressForOpenSea}/${tokenIdOfImage}`
                         if (
                             typeof imageSrc !== "undefined" &&
                             imageSrc != null

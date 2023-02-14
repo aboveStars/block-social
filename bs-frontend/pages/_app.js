@@ -10,7 +10,7 @@ import { NotificationProvider } from "web3uikit"
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.8",
+    uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.9",
 })
 
 export default function App({ Component, pageProps }) {

@@ -3,12 +3,13 @@ import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts"
 import {
   Approval,
   ApprovalForAll,
+  CommentMinted,
   Liked,
   MintingFinished,
   MintingRequestReceived,
   Transfer,
   UnLiked
-} from "../generated/BlockSocial/BlockSocial"
+} from "../generated/blockSocial/blockSocial"
 
 export function createApprovalEvent(
   owner: Address,
@@ -55,6 +56,34 @@ export function createApprovalForAllEvent(
   )
 
   return approvalForAllEvent
+}
+
+export function createCommentMintedEvent(
+  commentToTokenId: BigInt,
+  from: Address,
+  commentTokenId: BigInt
+): CommentMinted {
+  let commentMintedEvent = changetype<CommentMinted>(newMockEvent())
+
+  commentMintedEvent.parameters = new Array()
+
+  commentMintedEvent.parameters.push(
+    new ethereum.EventParam(
+      "commentToTokenId",
+      ethereum.Value.fromUnsignedBigInt(commentToTokenId)
+    )
+  )
+  commentMintedEvent.parameters.push(
+    new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
+  )
+  commentMintedEvent.parameters.push(
+    new ethereum.EventParam(
+      "commentTokenId",
+      ethereum.Value.fromUnsignedBigInt(commentTokenId)
+    )
+  )
+
+  return commentMintedEvent
 }
 
 export function createLikedEvent(

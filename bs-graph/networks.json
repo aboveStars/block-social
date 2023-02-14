@@ -1,7 +1,7 @@
 {
   "goerli": {
-    "BlockSocial": {
-      "address": "0xF868D0C54d20fc678A073eDa4eF6ea5df54a2a91"
+    "blockSocial": {
+      "address": "0x78084bf8FAE05b298677B7079eAa051256eFD90D"
     }
   }
 }

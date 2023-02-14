@@ -1,15 +1,17 @@
 import {
   Approval as ApprovalEvent,
   ApprovalForAll as ApprovalForAllEvent,
+  CommentMinted as CommentMintedEvent,
   Liked as LikedEvent,
   MintingFinished as MintingFinishedEvent,
   MintingRequestReceived as MintingRequestReceivedEvent,
   Transfer as TransferEvent,
   UnLiked as UnLikedEvent
-} from "../generated/BlockSocial/BlockSocial"
+} from "../generated/blockSocial/blockSocial"
 import {
   Approval,
   ApprovalForAll,
+  CommentMinted,
   Liked,
   MintingFinished,
   MintingRequestReceived,
@@ -39,6 +41,21 @@ export function handleApprovalForAll(event: ApprovalForAllEvent): void {
   entity.owner = event.params.owner
   entity.operator = event.params.operator
   entity.approved = event.params.approved
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleCommentMinted(event: CommentMintedEvent): void {
+  let entity = new CommentMinted(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.commentToTokenId = event.params.commentToTokenId
+  entity.from = event.params.from
+  entity.commentTokenId = event.params.commentTokenId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

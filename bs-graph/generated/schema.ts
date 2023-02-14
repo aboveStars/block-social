@@ -185,6 +185,94 @@ export class ApprovalForAll extends Entity {
   }
 }
 
+export class CommentMinted extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save CommentMinted entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type CommentMinted must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("CommentMinted", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static load(id: Bytes): CommentMinted | null {
+    return changetype<CommentMinted | null>(
+      store.get("CommentMinted", id.toHexString())
+    );
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get commentToTokenId(): BigInt {
+    let value = this.get("commentToTokenId");
+    return value!.toBigInt();
+  }
+
+  set commentToTokenId(value: BigInt) {
+    this.set("commentToTokenId", Value.fromBigInt(value));
+  }
+
+  get from(): Bytes {
+    let value = this.get("from");
+    return value!.toBytes();
+  }
+
+  set from(value: Bytes) {
+    this.set("from", Value.fromBytes(value));
+  }
+
+  get commentTokenId(): BigInt {
+    let value = this.get("commentTokenId");
+    return value!.toBigInt();
+  }
+
+  set commentTokenId(value: BigInt) {
+    this.set("commentTokenId", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
 export class Liked extends Entity {
   constructor(id: Bytes) {
     super();
