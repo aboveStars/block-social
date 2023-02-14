@@ -20,7 +20,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     useEffect(() => {
         getLikeStatus(_tokenId)
-    })
+    }, [])
 
     function handleNewNotification(_type, _title, _message) {
         dispatch({
@@ -40,7 +40,13 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         console.log("Hash of tx: " + tx.hash.toString())
 
         console.log("waiting for confirmaitons......")
-        const rTx = await tx.wait(1)
+        let rTx
+        try {
+            rTx = await tx.wait(1)
+        } catch (error) {
+            setDidWeLike(!isForLike)
+            console.error(error)
+        }
 
         handleNewNotification(
             "success",
@@ -50,8 +56,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
         console.log(rTx)
         console.log("Confirmed")
-
-        setDidWeLike(isForLike)
     }
 
     function handleNewNotification(_type, _title, _message) {
@@ -65,6 +69,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     async function handleLikeClick(_tokenId) {
         console.log("Liked Button!")
+        setDidWeLike(true)
 
         const _approveOptionsForLike = { ...approveOptions }
 
@@ -81,6 +86,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         await runContractFunction({
             params: _approveOptionsForLike,
             onError: (error) => {
+                setDidWeLike(false)
                 console.error(error)
             },
             onSuccess: (results) => handleApproveSuccess(results, true),
@@ -89,6 +95,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     async function handleUnClick(_tokenId) {
         console.log("Unliked Botton !")
+        setDidWeLike(false)
 
         const _approveOptionsForLike = { ...approveOptions }
 
@@ -105,6 +112,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         await runContractFunction({
             params: _approveOptionsForLike,
             onError: (error) => {
+                setDidWeLike(true)
                 console.error(error)
             },
             onSuccess: (results) => handleApproveSuccess(results, false),
@@ -114,7 +122,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     async function getLikeStatus(tokenIdForRequest) {
         console.log("Getting Like Status....")
         const activeAccountAddress = (await web3.eth.requestAccounts())[0]
-        console.log(activeAccountAddress)
 
         const _approveOptionsForLikeStatus = { ...approveOptions }
 
