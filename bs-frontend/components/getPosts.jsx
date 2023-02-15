@@ -94,19 +94,12 @@ export default function GetPosts() {
     async function handleClick() {
         setShowLoadingScreen(true)
         setShowPosts(false)
-        console.log(
-            "We are in 'handleClick' function \n WE will first check if chainId fetched..... "
-        )
 
         if (chainIdOk == false) {
             console.error("ChainId is not fetched correctly")
             setShowLoadingScreen(false)
             return
-        } else {
-            console.log("ChainId fetched correctly")
         }
-
-        console.log("Now we will test 'theGraph' ")
 
         const {
             data: dataFromQuery,
@@ -117,25 +110,23 @@ export default function GetPosts() {
         })
 
         if (loading) {
-            console.log("Query is in loading..... We will wait to finish")
             await waitUntil(() => loading == false)
-            console.log("Waiting finished... Now we debug.... !")
         }
 
-        console.log("We are checking if any error happened !")
         if (error) {
             setShowLoadingScreen(false)
             console.error(
                 "There is an error or errors when fetching data from theGraph"
             )
             return
-        } else {
-            console.log("No error happened.")
         }
 
-        console.log("We waited and checked for errors. \n We are good to go!")
-
-        console.log(dataFromQuery)
+        if (Object.keys(dataFromQuery["mintingFinisheds"]).length == 0) {
+            console.log("Data is empty, aborting.....")
+            setShowPosts(false)
+            setShowLoadingScreen(false)
+            return
+        }
 
         const allMintingFinishedsArray = dataFromQuery["mintingFinisheds"] // 1.data 2.data 3.data 4.data ....
 
@@ -146,8 +137,6 @@ export default function GetPosts() {
         orderedByTokenIdAllMintingFinishedArrays.sort((a, b) => {
             return b.tokenId - a.tokenId //
         })
-
-        console.log(orderedByTokenIdAllMintingFinishedArrays)
 
         const tokenIds = orderedByTokenIdAllMintingFinishedArrays.map(function (
             mintingFinished

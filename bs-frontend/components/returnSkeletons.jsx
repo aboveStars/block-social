@@ -1,5 +1,3 @@
-import { Skeleton } from "web3uikit"
-
 export default function ReturnSkeletons({ _length }) {
     return (
         <>

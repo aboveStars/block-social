@@ -38,8 +38,6 @@ async function generateFinalURI(_title, _messageToSend) {
     const mergedWithPrefixMeta = `${jsonPrefixForBase64}${base64Meta}`
     const finalMetaCode = mergedWithPrefixMeta
 
-    console.log(finalMetaCode)
-
     return finalMetaCode
 }
 

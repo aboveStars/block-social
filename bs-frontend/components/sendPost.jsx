@@ -36,7 +36,7 @@ export default function SendPostWorks() {
     async function handleApproveSuccess(tx) {
         handleNewNotification(
             "warning",
-            "Transaction in Progress",
+            "Transaction in Progress 🚀",
             "Post Waiting for Confirmation"
         )
 
@@ -45,17 +45,26 @@ export default function SendPostWorks() {
 
         setShowLoadingScreen(true)
 
-        console.log("waiting for confirmaitons......")
-        const rTx = await tx.wait(2)
+        console.log(`%cWaiting Confirmations ==> sendingPost`, `color: #19EEEE`)
+
+        try {
+            await tx.wait(2)
+        } catch (error) {
+            handleNewNotification(
+                "error",
+                "Transaction Couldn't Confirmed!",
+                "Error While Post Confirming"
+            )
+            console.error(error)
+        }
 
         handleNewNotification(
             "success",
-            "Transaction Confirmed!",
+            "Transaction Confirmed! 🥳",
             "Post Successfully Sent!"
         )
 
-        console.log(rTx)
-        console.log("Confirmed")
+        console.log(`%cConfirmed: Posting`, `color: #0DE54B`)
 
         setShowLoadingScreen(false)
     }

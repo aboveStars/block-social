@@ -1,10 +1,12 @@
 import PostBottomPart from "./postsBottomPart"
 
-export default function ReturnPosts({ _imagesArray, _tokenIdImageUriArray, _smartContractAddressForOpenSea }) {
+export default function ReturnPosts({
+    _imagesArray,
+    _tokenIdImageUriArray,
+    _smartContractAddressForOpenSea,
+}) {
     return (
         <div className="overflow-y-scroll h-96 my-5">
-            {console.log("we should see photos")}
-
             {_imagesArray.map((imageSrc) => {
                 {
                     {

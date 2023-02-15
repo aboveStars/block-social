@@ -14,6 +14,7 @@ import Web3 from "web3"
 import { generateFinalURI } from "@/scripts/generateUri"
 import { apolloClient } from "@/pages/_app"
 import { gqlCreatorForDesiredTokenIdToComment } from "@/utils/graphQueries"
+import waitUntil from "@/utils/waitUntil"
 
 export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     var web3 = new Web3(Web3.givenProvider || "ws://localhost:8545")
@@ -33,7 +34,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
-            console.log(chainId)
             setSmartContractAddress(
                 contractNetworkInformations["BlockSocial"][
                     web3.utils.hexToNumberString(chainId)
@@ -49,32 +49,58 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         }
     }, [chainId])
 
-    async function handleApproveSuccess(tx, isForLike) {
+    async function handleApproveSuccess(
+        tx,
+        isForWhat,
+        _fakeExistedFinalComments
+    ) {
         handleNewNotification(
             "warning",
-            "Transaction in Progress",
+            "Transaction in Progress 🚀",
             "Action Waiting for Confirmation"
         )
 
-        console.log("Hash of tx: " + tx.hash.toString())
+        console.log(
+            `%cWaiting Confirmaitons ==> %c${isForWhat} ==> %chttps://goerli.etherscan.io/tx/${tx.hash.toString()}`,
+            `color : #19EEEE`,
+            `color : #FF8B00 `,
+            `color : #EC5AE7`
+        )
 
-        console.log("waiting for confirmaitons......")
-        let rTx
         try {
-            rTx = await tx.wait(1)
+            await tx.wait(1)
         } catch (error) {
-            setDidWeLike(!isForLike)
+            if (isForWhat == "like") {
+                setDidWeLike(false)
+            } else if (isForWhat == "unLike") {
+                setDidWeLike(true)
+            } else if (isForWhat == "sendingComment") {
+                const fakeExistedFinalComments = _fakeExistedFinalComments
+                fakeExistedFinalComments.pop()
+                const updatedFinalComments = fakeExistedFinalComments
+                setFinalComments(updatedFinalComments)
+            }
+
+            handleNewNotification(
+                "error",
+                "Transaction Couldn't Confirmed!",
+                "Error While Action Confirming"
+            )
+
             console.error(error)
         }
 
         handleNewNotification(
             "success",
-            "Transaction Confirmed!",
+            "Transaction Confirmed! 🥳",
             "Action Successfully Sent!"
         )
 
-        console.log(rTx)
-        console.log("Confirmed")
+        console.log(
+            `%cConfirmed ==> %c${isForWhat}`,
+            `color: #0DE54B`,
+            `color: #FF8B00`
+        )
     }
 
     function handleNewNotification(_type, _title, _message) {
@@ -87,7 +113,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     }
 
     async function handleLikeClick(_tokenId) {
-        console.log("Liked Button!")
         setDidWeLike(true)
 
         const _approveOptionsForLike = { ...approveOptions }
@@ -105,7 +130,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                 setDidWeLike(false)
                 console.error(error)
             },
-            onSuccess: (results) => handleApproveSuccess(results, true),
+            onSuccess: (results) => handleApproveSuccess(results, "like"),
         })
     }
 
@@ -128,7 +153,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                 setDidWeLike(true)
                 console.error(error)
             },
-            onSuccess: (results) => handleApproveSuccess(results, false),
+            onSuccess: (results) => handleApproveSuccess(results, "unLike"),
         })
     }
 
@@ -137,7 +162,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             console.log("not today")
             return
         }
-        console.log("Getting Like Status....")
+
         const activeAccountAddress = (await web3.eth.requestAccounts())[0]
 
         const _approveOptionsForLikeStatus = { ...approveOptions }
@@ -151,8 +176,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             _personAddress: activeAccountAddress,
         }
 
-        console.log(_approveOptionsForLikeStatus)
-
         const likeStatus = await runContractFunction({
             params: _approveOptionsForLikeStatus,
             onError: (error) => {
@@ -163,8 +186,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         setDidWeLike(likeStatus)
     }
 
-    async function handleCommentButtonClick() {
-        console.log("CommentButtonClicked")
+    async function handleCommentButtonClick(_tokenId) {
         setShowCommentPanel(!showCommentPanel)
 
         const {
@@ -172,31 +194,54 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             error,
             loading,
         } = await apolloClient.query({
-            query: gqlCreatorForDesiredTokenIdToComment("0"),
+            query: gqlCreatorForDesiredTokenIdToComment(_tokenId),
         })
+
+        if (loading) {
+            await waitUntil(() => loading == false)
+        }
+
+        if (error) {
+            console.error(
+                "There is an error or errors when fetching data from theGraph"
+            )
+        }
+
+        if (Object.keys(dataFromQuery["commentMinteds"]).length == 0) {
+            console.log("Data is empty, ...aborting")
+            return
+        }
 
         const commentMinteds = dataFromQuery["commentMinteds"]
 
-        console.log(commentMinteds)
+        const sortedCommentMinteds = [...commentMinteds]
 
-        const finalCommentsWithCommentTokenIdArray = commentMinteds.map(
-            async function (commentMinted, index) {
+        sortedCommentMinteds.sort((a, b) => {
+            return a["commentTokenId"] - b["commentTokenId"]
+        })
+
+        const finalCommentsWithCommentTokenIdArray = sortedCommentMinteds.map(
+            async function (commentMinted) {
                 const sender = commentMinted["from"]
-                const commentSender = `${sender.slice(0, 3)}...${sender.slice(
-                    sender.length - 3,
-                    sender.lenght
-                )}`
-                console.log(commentSender)
+                const ourAddress = (await web3.eth.getAccounts())[0]
+                let commentSender
+                if (sender == ourAddress.toLowerCase()) {
+                    commentSender = "You"
+                } else {
+                    commentSender = `${sender.slice(0, 3)}...${sender.slice(
+                        sender.length - 3,
+                        sender.length
+                    )}`
+                }
 
                 const commentTokenId = commentMinted["commentTokenId"]
-                console.log(commentTokenId)
 
                 const uriOfComment = await getTokenURI(commentTokenId)
                 const jsonMeta = await (await fetch(uriOfComment)).json()
                 const comment = jsonMeta.description.toString()
 
                 const finalCommentWithTokenId = [
-                    `${index}. ${commentSender}: ${comment}`,
+                    `${commentSender}: ${comment}`,
                     commentTokenId.toString(),
                 ]
                 return finalCommentWithTokenId // ["1. 0x0..000 = Great!", "1"]
@@ -206,7 +251,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         const resolvedFinalCommentsWithCommentTokenIdArray = await Promise.all(
             finalCommentsWithCommentTokenIdArray
         )
-        console.log(resolvedFinalCommentsWithCommentTokenIdArray)
+
         setFinalComments(resolvedFinalCommentsWithCommentTokenIdArray)
     }
 
@@ -248,10 +293,41 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             _uri: uri,
         }
 
+        /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
+        const sender = (await web3.eth.getAccounts())[0]
+        const lowerSender = sender.toLowerCase()
+
+        const commentSender = "You"
+
+        const notVerifedComment = `${commentSender}:${comment}`
+
+        const existedFinalComments = finalComments
+        existedFinalComments.push([notVerifedComment, null])
+        const fakeExistedComments = existedFinalComments
+
+        const resolvedFakeExistedComments = await Promise.all(
+            fakeExistedComments
+        )
+
+        setFinalComments(resolvedFakeExistedComments)
+        /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
+
         await runContractFunction({
             params: _approveOptionsForComment,
             onError: (error) => {
+                const fakeExistedFinalComments = resolvedFakeExistedComments
+                fakeExistedFinalComments.pop()
+                const updatedFinalComments = fakeExistedFinalComments
+                setFinalComments(updatedFinalComments)
+
                 console.error(error)
+            },
+            onSuccess: (results) => {
+                handleApproveSuccess(
+                    results,
+                    "sendingComment",
+                    resolvedFakeExistedComments
+                )
             },
         })
     }
@@ -293,7 +369,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                     <button
                         className="dark:text-white"
                         onClick={async () => {
-                            await handleCommentButtonClick()
+                            await handleCommentButtonClick(_tokenId)
                         }}
                     >
                         <FaCommentAlt size="50" />
@@ -321,14 +397,25 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
                                                 return (
                                                     <div key={_index}>
-                                                        <a
-                                                            href={`https://testnets.opensea.io/assets/goerli/${smartContractAddress}/${tokenIdOfComment}`}
-                                                            target="_blank"
-                                                        >
-                                                            <div className="dark:text-black">
-                                                                {comment}
-                                                            </div>
-                                                        </a>
+                                                        {tokenIdOfComment ==
+                                                        null ? (
+                                                            <>
+                                                                <div className="dark:text-black">
+                                                                    {`${_index}.${comment}`}
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <a
+                                                                    href={`https://testnets.opensea.io/assets/goerli/${smartContractAddress}/${tokenIdOfComment}`}
+                                                                    target="_blank"
+                                                                >
+                                                                    <div className="dark:text-black">
+                                                                        {`${_index}.${comment}`}
+                                                                    </div>
+                                                                </a>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 )
                                             }
