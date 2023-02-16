@@ -10,19 +10,17 @@ import {
 } from "@/utils/approveOptions"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { useNotification } from "web3uikit"
-import Web3 from "web3"
 import { generateFinalURI } from "@/scripts/generateUri"
 import { apolloClient } from "@/pages/_app"
 import { gqlCreatorForDesiredTokenIdToComment } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
+import Web3 from "web3"
 
 export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
-    var web3 = new Web3(Web3.givenProvider || "ws://localhost:8545")
-
     const { runContractFunction } = useWeb3Contract({})
     const [didWeLike, setDidWeLike] = useState(false)
     const dispatch = useNotification()
-    const { chainId } = useMoralis()
+    const { chainId, account } = useMoralis()
 
     const [showCommentPanel, setShowCommentPanel] = useState(false)
 
@@ -36,18 +34,20 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
             setSmartContractAddress(
                 contractNetworkInformations["BlockSocial"][
-                    web3.utils.hexToNumberString(chainId)
+                    Web3.utils.hexToNumberString(chainId)
                 ]
             )
 
             getLikeStatus(
                 _tokenId,
                 contractNetworkInformations["BlockSocial"][
-                    web3.utils.hexToNumberString(chainId)
+                    Web3.utils.hexToNumberString(chainId)
                 ]
             )
+
+            setShowCommentPanel(false)
         }
-    }, [chainId])
+    }, [chainId, account])
 
     async function handleApproveSuccess(
         tx,
@@ -163,7 +163,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             return
         }
 
-        const activeAccountAddress = (await web3.eth.requestAccounts())[0]
+        const activeAccountAddress = account
 
         const _approveOptionsForLikeStatus = { ...approveOptions }
 
@@ -223,9 +223,9 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         const finalCommentsWithCommentTokenIdArray = sortedCommentMinteds.map(
             async function (commentMinted) {
                 const sender = commentMinted["from"]
-                const ourAddress = (await web3.eth.getAccounts())[0]
                 let commentSender
-                if (sender == ourAddress.toLowerCase()) {
+
+                if (sender == account) {
                     commentSender = "You"
                 } else {
                     commentSender = `${sender.slice(0, 3)}...${sender.slice(
@@ -294,8 +294,6 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         }
 
         /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
-        const sender = (await web3.eth.getAccounts())[0]
-        const lowerSender = sender.toLowerCase()
 
         const commentSender = "You"
 
