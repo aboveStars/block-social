@@ -44,10 +44,6 @@ export async function sendJSONToIpfs(_json) {
         },
         pinataMetadata: {
             name: "testing",
-            keyvalues: {
-                customKey: "customValue",
-                customKey2: "customValue2",
-            },
         },
         pinataContent: _json,
     })

@@ -6,6 +6,7 @@ import {
 } from "@/utils/approveOptions"
 import { gqlCreatorForDesiredSenderAddress } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
+import axios from "axios"
 import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
@@ -82,7 +83,14 @@ export default function GetPosts() {
 
     async function arrayCreatorForOpenSea(tokenId, fetchedMetaUri) {
         const resolvedMetaUri = await Promise.resolve(fetchedMetaUri)
-        const jsonFormattedMeta = await (await fetch(resolvedMetaUri)).json()
+        let jsonFormattedMeta
+        try {
+            jsonFormattedMeta = await (await fetch(resolvedMetaUri)).json()
+        } catch (error) {
+            console.error("Error while resolving meta for opensea")
+            return
+        }
+
         const imageUri = jsonFormattedMeta.image.toString()
 
         const existedArray = tokenIdImageUriArray
@@ -159,9 +167,19 @@ export default function GetPosts() {
         const imagesArrayF = (await Promise.all(metaUriArray)).map(
             async function (metaUri) {
                 if ((typeof metaUri).toString() !== "undefined") {
-                    const jsonFormattedMeta = await (
-                        await fetch(metaUri)
-                    ).json()
+                    let jsonFormattedMeta
+                    let fetchedData
+
+                    try {
+                        fetchedData = await fetch(metaUri)
+                        jsonFormattedMeta = await fetchedData.json()
+                        // handle the data here
+                    } catch (error) {
+                        console.error(
+                            "Error while resolving metadata for image"
+                        )
+                        return ""
+                    }
 
                     const imageUri = jsonFormattedMeta.image.toString()
                     // console.log(imageUri)
