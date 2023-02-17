@@ -2,7 +2,7 @@ import axios from "axios"
 import { pinataFileUrl, pinataJSONUrl } from "@/utils/pinataStuffs"
 
 /** Send to IPFS whatever you want except JSON, returns IpfsHash */
-async function sendFileToIpfs(_file) {
+export async function sendFileToIpfs(_file) {
     const formData = new FormData()
 
     const file = _file
@@ -37,7 +37,7 @@ async function sendFileToIpfs(_file) {
 }
 
 /** Send to JSON to IPFS, returns IpfsHash */
-async function sendJSONToIpfs(_json) {
+export async function sendJSONToIpfs(_json) {
     var data = JSON.stringify({
         pinataOptions: {
             cidVersion: 1,
@@ -72,9 +72,4 @@ async function sendJSONToIpfs(_json) {
     }
 
     return ipfsHash
-}
-
-module.exports = {
-    sendFileToIpfs,
-    sendJSONToIpfs,
 }
