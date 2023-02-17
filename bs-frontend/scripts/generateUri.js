@@ -1,14 +1,4 @@
-const metaDataTemplate = {
-    name: "",
-    description: "",
-    image: "",
-    attributes: [
-        {
-            trait_Type: "",
-            value: 0,
-        },
-    ],
-}
+import { metaDataTemplate } from "@/utils/metadataTemplate"
 
 const svgPrefixForBase64 = "data:image/svg+xml;base64,"
 const jsonPrefixForBase64 = "data:application/json;base64,"

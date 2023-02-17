@@ -2,6 +2,7 @@ import { ConnectButton } from "web3uikit"
 import GetPosts from "@/components/getPosts"
 import CreateButton from "@/components/createButton"
 import { useMoralis } from "react-moralis"
+import UploadButton from "@/components/uploadButton"
 
 export default function Home() {
     const { isWeb3Enabled, account } = useMoralis()
@@ -19,6 +20,7 @@ export default function Home() {
                             </a>
 
                             <CreateButton />
+                            <UploadButton />
                         </div>
 
                         <div className="col-span-1">
