@@ -1,7 +1,8 @@
 import axios from "axios"
 import { pinataFileUrl, pinataJSONUrl } from "@/utils/pinataStuffs"
 
-/** Send to IPFS whatever you want except JSON, returns IpfsHash */
+/** Send to IPFS whatever you want except JSON, returns IpfsHash
+ */
 export async function sendFileToIpfs(_file) {
     const formData = new FormData()
 
@@ -36,7 +37,9 @@ export async function sendFileToIpfs(_file) {
     return ipfsHash
 }
 
-/** Send to JSON to IPFS, returns IpfsHash */
+/** Send to JSON to IPFS, returns IpfsHash
+ * @param {JSON} _json
+ */
 export async function sendJSONToIpfs(_json) {
     var data = JSON.stringify({
         pinataOptions: {

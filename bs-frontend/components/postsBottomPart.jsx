@@ -10,7 +10,7 @@ import {
 } from "@/utils/approveOptions"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import { useNotification } from "web3uikit"
-import { generateFinalURI } from "@/scripts/generateUri"
+import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB"
 import { apolloClient } from "@/pages/_app"
 import { gqlCreatorForDesiredTokenIdToComment } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
@@ -283,7 +283,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         _approveOptionsForComment.contractAddress = smartContractAddress
         _approveOptionsForComment.functionName = "mintComment"
 
-        const uri = await generateFinalURI(
+        const uri = await generateMetdataUriForTextBased(
             `Comment for : #${_tokenId}`,
             comment
         )

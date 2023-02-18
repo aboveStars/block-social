@@ -1,4 +1,4 @@
-import { generateFinalURI } from "@/scripts/generateUri"
+import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB"
 import { approveOptions } from "@/utils/approveOptions"
 import { useEffect, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
@@ -10,6 +10,7 @@ var contractNetworkInformations = require("../contractInformations/BlockSocial_N
 
 import { RiSendPlaneFill } from "react-icons/ri"
 import ReturnLoading from "./returnLoading"
+import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 
 export default function SendPostWorks() {
     const [messageTitle, setMessageTitle] = useState("")
@@ -22,6 +23,17 @@ export default function SendPostWorks() {
     const [smartContractAddress, setSmartContractAddress] = useState("")
 
     const dispatch = useNotification()
+
+    function handleNewNotification(_type, _title, _message) {
+        dispatch({
+            type: _type,
+            message: _message,
+            title: _title,
+            position: "topR",
+        })
+    }
+
+    const { runContractFunction } = useWeb3Contract({})
 
     useEffect(() => {
         if (chainId) {
@@ -69,18 +81,15 @@ export default function SendPostWorks() {
         setShowLoadingScreen(false)
     }
 
-    function handleNewNotification(_type, _title, _message) {
-        dispatch({
-            type: _type,
-            message: _message,
-            title: _title,
-            position: "topR",
-        })
-    }
+    const sendPost = async () => {
+        const metadataUri = await generateMetdataUriForTextBased(
+            messageTitle,
+            message
+        )
 
-    const { runContractFunction } = useWeb3Contract({})
+        const prefixedMetadataUri = `${urlPrefixForIPFS}${metadataUri}`
+        console.log(prefixedMetadataUri)
 
-    const sendPost = async (_uri) => {
         const _approveOptionsForSendNft = { ...approveOptions }
         _approveOptionsForSendNft.abi = blockSocialAbi
         if (chainId) {
@@ -90,7 +99,7 @@ export default function SendPostWorks() {
         }
         _approveOptionsForSendNft.functionName = "mintingPost"
         _approveOptionsForSendNft.params = {
-            _uri: _uri,
+            _uri: prefixedMetadataUri,
         }
 
         await runContractFunction({
@@ -151,12 +160,7 @@ export default function SendPostWorks() {
 
                             <button
                                 onClick={async () => {
-                                    await sendPost(
-                                        await generateFinalURI(
-                                            messageTitle,
-                                            message
-                                        )
-                                    )
+                                    await sendPost()
                                 }}
                                 className="flex text-white gap-1 ml-auto"
                             >

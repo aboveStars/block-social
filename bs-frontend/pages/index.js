@@ -2,7 +2,7 @@ import { ConnectButton } from "web3uikit"
 import GetPosts from "@/components/getPosts"
 import CreateButton from "@/components/createButton"
 import { useMoralis } from "react-moralis"
-import UploadButton from "@/components/uploadButton"
+import UploadButton from "@/components/uploadImage"
 
 export default function Home() {
     const { isWeb3Enabled, account } = useMoralis()
