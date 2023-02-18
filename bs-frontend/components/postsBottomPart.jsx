@@ -15,6 +15,7 @@ import { apolloClient } from "@/pages/_app"
 import { gqlCreatorForDesiredTokenIdToComment } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
 import Web3 from "web3"
+import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 
 export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     const { runContractFunction } = useWeb3Contract({})
@@ -237,7 +238,14 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                 const commentTokenId = commentMinted["commentTokenId"]
 
                 const uriOfComment = await getTokenURI(commentTokenId)
-                const jsonMeta = await (await fetch(uriOfComment)).json()
+                let jsonMeta
+                try {
+                    jsonMeta = await (await fetch(uriOfComment)).json()
+                } catch (error) {
+                    console.error(error)
+                    return ["error", commentTokenId.toString()]
+                }
+
                 const comment = jsonMeta.description.toString()
 
                 const finalCommentWithTokenId = [
@@ -285,12 +293,15 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
         const uri = await generateMetdataUriForTextBased(
             `Comment for : #${_tokenId}`,
+            comment,
             comment
         )
 
+        const prefixedUri = `${urlPrefixForIPFS}${uri}`
+
         _approveOptionsForComment.params = {
             _tokenIdToComment: _tokenId,
-            _uri: uri,
+            _uri: prefixedUri,
         }
 
         /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
