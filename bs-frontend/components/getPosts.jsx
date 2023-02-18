@@ -5,8 +5,8 @@ import {
     contractNetworkInformations,
 } from "@/utils/approveOptions"
 import { gqlCreatorForDesiredSenderAddress } from "@/utils/graphQueries"
+import { postInformationTemplateJSON } from "@/utils/postStuff"
 import waitUntil from "@/utils/waitUntil"
-import axios from "axios"
 import { useEffect, useMemo, useState } from "react"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
@@ -18,26 +18,18 @@ export default function GetPosts() {
     const { chainId } = useMoralis()
 
     const [desiredSenderAddress, setDesiredSenderAddress] = useState(null)
-    const [imagesArray, setImagesArray] = useState(null)
+    const [postsArray, setPostsArray] = useState(null)
 
     const [chainIdOk, setChainIdOk] = useState(false)
     const [showPosts, setShowPosts] = useState(false)
-
-    const [tokenIdImageUriArray, setTokenIdImageUriArray] = useState([])
 
     const [showLoadingScreen, setShowLoadingScreen] = useState(false)
 
     const [smartContractAddress, setSmartContractAddress] = useState("")
 
     const memoReturnPosts = useMemo(
-        () => (
-            <ReturnPosts
-                _imagesArray={imagesArray}
-                _tokenIdImageUriArray={tokenIdImageUriArray}
-                _smartContractAddressForOpenSea={smartContractAddress}
-            />
-        ),
-        [imagesArray, tokenIdImageUriArray]
+        () => <ReturnPosts _posts={postsArray} />,
+        [postsArray]
     )
 
     const memoReturnSkeletons = useMemo(
@@ -79,24 +71,6 @@ export default function GetPosts() {
         })
 
         return resultTokenId
-    }
-
-    async function arrayCreatorForOpenSea(tokenId, fetchedMetaUri) {
-        const resolvedMetaUri = await Promise.resolve(fetchedMetaUri)
-        let jsonFormattedMeta
-        try {
-            jsonFormattedMeta = await (await fetch(resolvedMetaUri)).json()
-        } catch (error) {
-            console.error("Error while resolving meta for opensea")
-            return
-        }
-
-        const imageUri = jsonFormattedMeta.image.toString()
-
-        const existedArray = tokenIdImageUriArray
-        existedArray[imageUri] = tokenId
-        const updatedArray = existedArray
-        setTokenIdImageUriArray(updatedArray)
     }
 
     async function handleClick() {
@@ -146,56 +120,42 @@ export default function GetPosts() {
             return b.tokenId - a.tokenId //
         })
 
-        const tokenIds = orderedByTokenIdAllMintingFinishedArrays.map(function (
-            mintingFinished
-        ) {
-            return mintingFinished["tokenId"].toString()
-        })
+        const posts = orderedByTokenIdAllMintingFinishedArrays.map(
+            async (mintingFinished) => {
+                const postInforomation = { ...postInformationTemplateJSON }
 
-        const metaUriArray = tokenIds.map(async function (tokenId) {
-            const fetchedMetaUri = await getTokenURI(tokenId)
+                postInforomation.sender = mintingFinished.from
 
-            if ((typeof fetchedMetaUri).toString() !== "undefined") {
-                const finalFetchedMetaUri = fetchedMetaUri.toString()
+                const postMetadataURI = await getTokenURI(
+                    mintingFinished.tokenId
+                )
 
-                await arrayCreatorForOpenSea(tokenId, finalFetchedMetaUri)
-
-                return finalFetchedMetaUri
-            }
-        })
-
-        const imagesArrayF = (await Promise.all(metaUriArray)).map(
-            async function (metaUri) {
-                if ((typeof metaUri).toString() !== "undefined") {
-                    let jsonFormattedMeta
-                    let fetchedData
-
-                    try {
-                        fetchedData = await fetch(metaUri)
-                        jsonFormattedMeta = await fetchedData.json()
-                        // handle the data here
-                    } catch (error) {
-                        console.error(
-                            "Error while resolving metadata for image"
-                        )
-                        return ""
-                    }
-
-                    const imageUri = jsonFormattedMeta.image.toString()
-                    // console.log(imageUri)
-                    return imageUri
+                let postMetadata
+                try {
+                    postMetadata = await (await fetch(postMetadataURI)).json()
+                } catch (error) {
+                    console.error("Metadata URI is not valid!")
+                    return undefined
                 }
+
+                postInforomation.title = postMetadata.name
+                postInforomation.imageSrc = postMetadata.image
+                postInforomation.description = postMetadata.description
+
+                postInforomation.contractAddress = mintingFinished.nftAddress
+                postInforomation.tokenId = mintingFinished.tokenId
+
+                return postInforomation
             }
         )
 
-        if (
-            imagesArrayF != null &&
-            (typeof imagesArrayF).toString() !== "undefined"
-        ) {
-            setImagesArray(await Promise.all(imagesArrayF))
-            setShowPosts(true)
-            setShowLoadingScreen(false)
-        }
+        const resolvedPosts = await Promise.all(posts)
+        const filteredPosts = resolvedPosts.filter((post) => post)
+        const finalPosts = filteredPosts
+
+        setPostsArray(finalPosts)
+        setShowLoadingScreen(false)
+        setShowPosts(true)
     }
 
     return (

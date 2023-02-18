@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client"
 
-const getPostQuery = gql`
+export const getPostQuery = gql`
     {
         mintingFinisheds(where: { tokenId: 4 }) {
             nftAddress
@@ -9,7 +9,7 @@ const getPostQuery = gql`
     }
 `
 
-function gqlCreatorForDesiredNftAddress(_desiredNftAddress) {
+export function gqlCreatorForDesiredNftAddress(_desiredNftAddress) {
     return gql`
         {
             mintingFinisheds(where: { nftAddress: "${_desiredNftAddress}" }) {
@@ -20,18 +20,19 @@ function gqlCreatorForDesiredNftAddress(_desiredNftAddress) {
     `
 }
 
-function gqlCreatorForDesiredSenderAddress(_desiredSenderAddress) {
+export function gqlCreatorForDesiredSenderAddress(_desiredSenderAddress) {
     return gql`
         {
             mintingFinisheds(where: { from: "${_desiredSenderAddress}" }) {
                 nftAddress
                 tokenId
+                from
             }
         }
     `
 }
 
-function gqlCreatorForDesiredTokenIdToComment(_desiredTokenId) {
+export function gqlCreatorForDesiredTokenIdToComment(_desiredTokenId) {
     return gql`
         {
             commentMinteds(where: { commentToTokenId: "${_desiredTokenId}" }) {
@@ -41,11 +42,4 @@ function gqlCreatorForDesiredTokenIdToComment(_desiredTokenId) {
             }
         }
     `
-}
-
-module.exports = {
-    getPostQuery,
-    gqlCreatorForDesiredNftAddress,
-    gqlCreatorForDesiredSenderAddress,
-    gqlCreatorForDesiredTokenIdToComment,
 }
