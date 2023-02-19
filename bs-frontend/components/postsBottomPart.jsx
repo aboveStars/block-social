@@ -18,6 +18,8 @@ import Web3 from "web3"
 import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 import { commentInformationTemplate } from "@/utils/commentStuff"
 
+import { FcLikePlaceholder, FcLike } from "react-icons/fc"
+
 export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     const { runContractFunction } = useWeb3Contract({})
     const [didWeLike, setDidWeLike] = useState(false)
@@ -31,6 +33,9 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     const [comments, setComments] = useState([])
 
     const [smartContractAddress, setSmartContractAddress] = useState("")
+
+    const [likeCount, setLikeCount] = useState("0")
+    const [commentCount, setCommentCount] = useState("0")
 
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
@@ -132,7 +137,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         })
     }
 
-    async function handleUnClick(_tokenId) {
+    async function handleUnLikeClick(_tokenId) {
         console.log("Unliked Botton !")
         setDidWeLike(false)
 
@@ -343,13 +348,77 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     }
 
     return (
-        <div>
+        <>
+            <div>
+                <div className="flex p-4 justify-between">
+                    <div className="flex items-center space-x-2">
+                        <img
+                            className="w-10 rounded-full"
+                            src="https://d2qp0siotla746.cloudfront.net/img/use-cases/profile-picture/template_3.jpg"
+                            alt="sara"
+                        />
+                        <h2 className="text-gray-800 font-bold cursor-pointer">
+                            Felipe Sacudon
+                        </h2>
+                    </div>
+                    <div className="flex space-x-2">
+                        <div className="flex space-x-1 items-center">
+                            <button
+                                onClick={async () => {
+                                    await handleCommentButtonClick(_tokenId)
+                                }}
+                            >
+                                <span>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-7 w-7 text-gray-600 cursor-pointer"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                        />
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <span>{commentCount}</span>
+                        </div>
+                        <div className="flex space-x-1 items-center">
+                            <button
+                                onClick={async () => {
+                                    if (didWeLike) {
+                                        await handleUnLikeClick(_tokenId)
+                                    } else {
+                                        await handleLikeClick(_tokenId)
+                                    }
+                                }}
+                            >
+                                {didWeLike == true ? (
+                                    <>
+                                        <FcLike size="27" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <FcLikePlaceholder size="27" />
+                                    </>
+                                )}
+                            </button>
+
+                            <span>{likeCount}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* <div>
             {showCommentPanel == false ? (
                 <div className="flex gap-5 justify-center">
                     <button className="dark:text-white">
-                        <a href={_openSeaUrlForImage} target="_blank">
-                            <MdSell size="50" />
-                        </a>
+                       
                     </button>
 
                     {didWeLike == true ? (
@@ -488,6 +557,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                     </div>
                 </div>
             )}
-        </div>
+        </div> */}
+        </>
     )
 }
