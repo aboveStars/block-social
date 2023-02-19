@@ -16,6 +16,7 @@ import { gqlCreatorForDesiredTokenIdToComment } from "@/utils/graphQueries"
 import waitUntil from "@/utils/waitUntil"
 import Web3 from "web3"
 import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
+import { commentInformationTemplate } from "@/utils/commentStuff"
 
 export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     const { runContractFunction } = useWeb3Contract({})
@@ -27,7 +28,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     const [comment, setComment] = useState("")
 
-    const [finalComments, setFinalComments] = useState([])
+    const [comments, setComments] = useState([])
 
     const [smartContractAddress, setSmartContractAddress] = useState("")
 
@@ -50,11 +51,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         }
     }, [chainId, account])
 
-    async function handleApproveSuccess(
-        tx,
-        isForWhat,
-        _fakeExistedFinalComments
-    ) {
+    async function handleApproveSuccess(tx, isForWhat, _fakeComments) {
         handleNewNotification(
             "warning",
             "Transaction in Progress 🚀",
@@ -76,10 +73,10 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             } else if (isForWhat == "unLike") {
                 setDidWeLike(true)
             } else if (isForWhat == "sendingComment") {
-                const fakeExistedFinalComments = _fakeExistedFinalComments
-                fakeExistedFinalComments.pop()
-                const updatedFinalComments = fakeExistedFinalComments
-                setFinalComments(updatedFinalComments)
+                const fakeComments = _fakeComments
+                fakeComments.pop()
+                const updatedComments = fakeComments
+                setComments(updatedComments)
             }
 
             handleNewNotification(
@@ -221,46 +218,46 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             return a["commentTokenId"] - b["commentTokenId"]
         })
 
-        const finalCommentsWithCommentTokenIdArray = sortedCommentMinteds.map(
-            async function (commentMinted) {
-                const sender = commentMinted["from"]
-                let commentSender
-
-                if (sender == account) {
-                    commentSender = "You"
-                } else {
-                    commentSender = `${sender.slice(0, 3)}...${sender.slice(
-                        sender.length - 3,
-                        sender.length
-                    )}`
-                }
-
-                const commentTokenId = commentMinted["commentTokenId"]
-
-                const uriOfComment = await getTokenURI(commentTokenId)
-                let jsonMeta
-                try {
-                    jsonMeta = await (await fetch(uriOfComment)).json()
-                } catch (error) {
-                    console.error(error)
-                    return ["error", commentTokenId.toString()]
-                }
-
-                const comment = jsonMeta.description.toString()
-
-                const finalCommentWithTokenId = [
-                    `${commentSender}: ${comment}`,
-                    commentTokenId.toString(),
-                ]
-                return finalCommentWithTokenId // ["1. 0x0..000 = Great!", "1"]
+        const comments = sortedCommentMinteds.map(async function (
+            commentMinted
+        ) {
+            const sender = commentMinted.from
+            let senderFiltered
+            if (sender == account) {
+                senderFiltered = "You"
+            } else {
+                senderFiltered = sender
             }
-        )
 
-        const resolvedFinalCommentsWithCommentTokenIdArray = await Promise.all(
-            finalCommentsWithCommentTokenIdArray
-        )
+            const commentTokenId = commentMinted.commentTokenId
 
-        setFinalComments(resolvedFinalCommentsWithCommentTokenIdArray)
+            const metadataUri = await getTokenURI(commentTokenId)
+
+            let metadata
+            try {
+                metadata = await (await fetch(metadataUri)).json()
+            } catch (error) {
+                console.error("Error while resolving comment metadata-URI")
+                return undefined
+            }
+
+            const commentContent = metadata.description.toString()
+
+            const commentInformation = { ...commentInformationTemplate }
+
+            commentInformation.sender = senderFiltered
+            commentInformation.content = commentContent
+            commentInformation.tokenId = commentTokenId
+
+            return commentInformation
+        })
+
+        const resolvedComments = await Promise.all(comments)
+        const filteredComments = resolvedComments.filter((comment) => comment)
+
+        console.log(filteredComments)
+
+        setComments(filteredComments)
     }
 
     async function getTokenURI(_tokenId) {
@@ -306,28 +303,32 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
         /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
 
-        const commentSender = "You"
+        const fakeCommentSender = "You"
+        const fakeTokenId = "-1"
+        const fakeCommentContent = comment
 
-        const notVerifedComment = `${commentSender}:${comment}`
+        const fakeCommentInformation = { ...commentInformationTemplate }
 
-        const existedFinalComments = finalComments
-        existedFinalComments.push([notVerifedComment, null])
-        const fakeExistedComments = existedFinalComments
+        fakeCommentInformation.sender = fakeCommentSender
+        fakeCommentInformation.content = fakeCommentContent
+        fakeCommentInformation.tokenId = fakeTokenId
 
-        const resolvedFakeExistedComments = await Promise.all(
-            fakeExistedComments
-        )
+        const existedComments = comments
+        existedComments.push(fakeCommentInformation)
+        const updatedFakeComments = existedComments
 
-        setFinalComments(resolvedFakeExistedComments)
+        const resolvedFakeComments = await Promise.all(updatedFakeComments)
+
+        setComments(resolvedFakeComments)
         /** FAKE FOR USER TO SEE ITS COMMENT ON SCREEN */
 
         await runContractFunction({
             params: _approveOptionsForComment,
             onError: (error) => {
-                const fakeExistedFinalComments = resolvedFakeExistedComments
+                const fakeExistedFinalComments = resolvedFakeComments
                 fakeExistedFinalComments.pop()
                 const updatedFinalComments = fakeExistedFinalComments
-                setFinalComments(updatedFinalComments)
+                setComments(updatedFinalComments)
 
                 console.error(error)
             },
@@ -335,7 +336,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                 handleApproveSuccess(
                     results,
                     "sendingComment",
-                    resolvedFakeExistedComments
+                    resolvedFakeComments
                 )
             },
         })
@@ -394,33 +395,50 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                                         Comments
                                     </div>
                                 </div>
-                                {finalComments == false ? (
+                                {comments == false ? (
                                     <></>
                                 ) : (
                                     <>
-                                        {finalComments.map(
-                                            (finalComment, _index) => {
-                                                const tokenIdOfComment =
-                                                    finalComment[1]
-                                                const comment = finalComment[0]
+                                        {comments.map(
+                                            (commentInformation, _index) => {
+                                                const sender =
+                                                    commentInformation.sender
+
+                                                let shortSender
+                                                if (sender == "You") {
+                                                    shortSender = "You"
+                                                } else {
+                                                    shortSender = `${sender.slice(
+                                                        0,
+                                                        3
+                                                    )}..${sender.slice(
+                                                        sender.length - 3,
+                                                        sender.length
+                                                    )}`
+                                                }
+
+                                                const tokenId =
+                                                    commentInformation.tokenId
+
+                                                const comment =
+                                                    commentInformation.content
 
                                                 return (
                                                     <div key={_index}>
-                                                        {tokenIdOfComment ==
-                                                        null ? (
+                                                        {tokenId == "-1" ? (
                                                             <>
                                                                 <div className="dark:text-black">
-                                                                    {`${_index}.${comment}`}
+                                                                    {`${_index}. ${shortSender}: ${comment}`}
                                                                 </div>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <a
-                                                                    href={`https://testnets.opensea.io/assets/goerli/${smartContractAddress}/${tokenIdOfComment}`}
+                                                                    href={`https://testnets.opensea.io/assets/goerli/${smartContractAddress}/${tokenId}`}
                                                                     target="_blank"
                                                                 >
                                                                     <div className="dark:text-black">
-                                                                        {`${_index}.${comment}`}
+                                                                        {`${_index}. ${shortSender}: ${comment}`}
                                                                     </div>
                                                                 </a>
                                                             </>
