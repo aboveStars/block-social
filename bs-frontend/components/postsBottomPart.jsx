@@ -19,14 +19,21 @@ import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 import { commentInformationTemplate } from "@/utils/commentStuff"
 
 import { FcLikePlaceholder, FcLike } from "react-icons/fc"
+import {
+    addressToNumbers,
+    loremPicsumPrefix,
+} from "@/utils/addressToImageNumber"
 
-export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
+export default function PostBottomPart({
+    _postSender,
+    _tokenId,
+    _showPanel,
+    _setShowPanel,
+}) {
     const { runContractFunction } = useWeb3Contract({})
     const [didWeLike, setDidWeLike] = useState(false)
     const dispatch = useNotification()
     const { chainId, account } = useMoralis()
-
-    const [showCommentPanel, setShowCommentPanel] = useState(false)
 
     const [comment, setComment] = useState("")
 
@@ -36,6 +43,8 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     const [likeCount, setLikeCount] = useState("0")
     const [commentCount, setCommentCount] = useState("0")
+
+    const [profilePhoto, setProfilePhoto] = useState()
 
     useEffect(() => {
         if ((typeof chainId).toString() !== "undefined" || chainId != null) {
@@ -52,7 +61,9 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
                 ]
             )
 
-            setShowCommentPanel(false)
+            // setShowCommentPanel(false)
+
+            getProfilePhoto()
         }
     }, [chainId, account])
 
@@ -75,8 +86,10 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         } catch (error) {
             if (isForWhat == "like") {
                 setDidWeLike(false)
+                setLikeCount((Number(commentCount) + -1).toString())
             } else if (isForWhat == "unLike") {
                 setDidWeLike(true)
+                setLikeCount((Number(commentCount) + 1).toString())
             } else if (isForWhat == "sendingComment") {
                 const fakeComments = _fakeComments
                 fakeComments.pop()
@@ -118,6 +131,11 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     async function handleLikeClick(_tokenId) {
         setDidWeLike(true)
 
+        const existedLikeCount = likeCount
+        const predictedLikeCount = (Number(existedLikeCount) + 1).toString()
+
+        setLikeCount(predictedLikeCount)
+
         const _approveOptionsForLike = { ...approveOptions }
 
         _approveOptionsForLike.abi = blockSocialAbi
@@ -131,6 +149,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             params: _approveOptionsForLike,
             onError: (error) => {
                 setDidWeLike(false)
+                setLikeCount(existedLikeCount)
                 console.error(error)
             },
             onSuccess: (results) => handleApproveSuccess(results, "like"),
@@ -138,8 +157,11 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
     }
 
     async function handleUnLikeClick(_tokenId) {
-        console.log("Unliked Botton !")
         setDidWeLike(false)
+        const existedLikeCount = likeCount
+        const predictedLikeCount = (Number(existedLikeCount) - 1).toString()
+
+        setLikeCount(predictedLikeCount)
 
         const _approveOptionsForLike = { ...approveOptions }
 
@@ -154,6 +176,7 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
             params: _approveOptionsForLike,
             onError: (error) => {
                 setDidWeLike(true)
+                setLikeCount(existedLikeCount)
                 console.error(error)
             },
             onSuccess: (results) => handleApproveSuccess(results, "unLike"),
@@ -187,10 +210,47 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
         })
 
         setDidWeLike(likeStatus)
+
+        const _approveOptionsForLikeCount = { ...approveOptions }
+
+        _approveOptionsForLikeCount.abi = blockSocialAbi
+        _approveOptionsForLikeCount.contractAddress = _contractAddress
+        _approveOptionsForLikeCount.functionName = "getLikeCount"
+        _approveOptionsForLikeCount.params = {
+            _tokenId: tokenIdForRequest,
+        }
+
+        const likeCount = await runContractFunction({
+            params: _approveOptionsForLikeCount,
+            onError: (error) => {
+                console.error(error)
+            },
+        })
+
+        setLikeCount(likeCount.toString())
+    }
+
+    async function getProfilePhoto() {
+        const accountAddress = account
+
+        const numberVersionOfAccount = await addressToNumbers(accountAddress)
+
+        const photoCountInServer = 1000
+
+        // I don't understand why but when I put "1" after photoCount... It throws out :(
+        const scaledNumber = (numberVersionOfAccount % photoCountInServer) + 1
+
+        const urlForImage = `${loremPicsumPrefix}${scaledNumber}/200`
+
+        setProfilePhoto(urlForImage)
     }
 
     async function handleCommentButtonClick(_tokenId) {
-        setShowCommentPanel(!showCommentPanel)
+        const empty = { ..._showPanel }
+        console.log(empty)
+        empty[_tokenId] = true
+        console.log(empty)
+        _setShowPanel(empty)
 
         const {
             data: dataFromQuery,
@@ -349,71 +409,74 @@ export default function PostBottomPart({ _openSeaUrlForImage, _tokenId }) {
 
     return (
         <>
-            <div>
-                <div className="flex p-4 justify-between">
-                    <div className="flex items-center space-x-2">
-                        <img
-                            className="w-10 rounded-full"
-                            src="https://d2qp0siotla746.cloudfront.net/img/use-cases/profile-picture/template_3.jpg"
-                            alt="sara"
-                        />
-                        <h2 className="text-gray-800 font-bold cursor-pointer">
-                            Felipe Sacudon
-                        </h2>
-                    </div>
-                    <div className="flex space-x-2">
-                        <div className="flex space-x-1 items-center">
-                            <button
-                                onClick={async () => {
-                                    await handleCommentButtonClick(_tokenId)
-                                }}
-                            >
-                                <span>
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-7 w-7 text-gray-600 cursor-pointer"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                        />
-                                    </svg>
-                                </span>
-                            </button>
-
-                            <span>{commentCount}</span>
+            <>
+                <div>
+                    <div className="flex p-4 justify-between">
+                        <div className="flex items-center space-x-2">
+                            <img
+                                className="w-10 rounded-full"
+                                src={profilePhoto}
+                                alt="sara"
+                            />
+                            <h2 className="text-gray-800 font-bold cursor-pointer overflow-hidden overflow-ellipsis w-14">
+                                {_postSender}
+                            </h2>
                         </div>
-                        <div className="flex space-x-1 items-center">
-                            <button
-                                onClick={async () => {
-                                    if (didWeLike) {
-                                        await handleUnLikeClick(_tokenId)
-                                    } else {
-                                        await handleLikeClick(_tokenId)
-                                    }
-                                }}
-                            >
-                                {didWeLike == true ? (
-                                    <>
-                                        <FcLike size="27" />
-                                    </>
-                                ) : (
-                                    <>
-                                        <FcLikePlaceholder size="27" />
-                                    </>
-                                )}
-                            </button>
+                        <div className="flex space-x-2">
+                            <div className="flex space-x-1 items-center">
+                                <button
+                                    onClick={async () => {
+                                        await handleCommentButtonClick(_tokenId)
+                                    }}
+                                >
+                                    <span>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-7 w-7 text-gray-600 cursor-pointer"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                            />
+                                        </svg>
+                                    </span>
+                                </button>
 
-                            <span>{likeCount}</span>
+                                <span>{commentCount}</span>
+                            </div>
+                            <div className="flex space-x-1 items-center">
+                                <button
+                                    onClick={async () => {
+                                        if (didWeLike) {
+                                            await handleUnLikeClick(_tokenId)
+                                        } else {
+                                            await handleLikeClick(_tokenId)
+                                        }
+                                    }}
+                                >
+                                    {didWeLike == true ? (
+                                        <>
+                                            <FcLike size="27" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FcLikePlaceholder size="27" />
+                                        </>
+                                    )}
+                                </button>
+
+                                <span>{likeCount}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
+
             {/* <div>
             {showCommentPanel == false ? (
                 <div className="flex gap-5 justify-center">
