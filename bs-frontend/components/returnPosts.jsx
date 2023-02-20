@@ -6,11 +6,10 @@ export default function ReturnPosts({ _posts }) {
     const [showPanel, setShowPanel] = useState({})
     return (
         <>
-            {console.log("Heyyyyyy")}
             <div
                 className="flex flex-col"
                 id="main"
-                style={{ maxHeight: "510px" }}
+                style={{ maxHeight: "650px" }}
             >
                 <div className="overflow-y-scroll flex flex-col">
                     {_posts.map((post) => {
@@ -31,29 +30,15 @@ export default function ReturnPosts({ _posts }) {
 
                         const openSeaUrlForImage = `${urlPrefixForOpensea}${postContractAddress}/${postTokenId}`
 
-                        console.log(showPanel)
-                        console.log(showPanel[postTokenId])
+                        /** Shows comments when true */
+                        const commentPanelDirectPositive =
+                            (typeof showPanel[postTokenId]).toString() !==
+                                "undefined" && showPanel[postTokenId] !== false
 
+                        console.log
                         return (
-                            // <div key={postTokenId} className="bg-white rounded-lg shadow-md p-4 mb-4">
-                            //     <div className="text-white">{shortSender} </div>
-                            //     <div className="text-white">{postTitle} </div>
-
-                            //     <img src={postImageSrc} />
-
-                            //     <div className="text-white">{postDescription}</div>
-
-                            //     <PostBottomPart
-                            //         _openSeaUrlForImage={`${urlPrefixForOpensea}${postContractAddress}/${postTokenId}`}
-                            //         _tokenId={postTokenId}
-                            //     />
-                            // </div>
-
                             <>
-                            
-                                {(typeof showPanel[postTokenId]).toString() ===
-                                    "undefined" ||
-                                showPanel[postTokenId] === false ? (
+                                {commentPanelDirectPositive === false ? (
                                     <div className=" flex justify-center items-center my-5">
                                         <div className="container w-11/12 bg-white rounded-xl shadow-lg transform transition duration-500 hover:shadow-2xl">
                                             <div>
@@ -86,23 +71,24 @@ export default function ReturnPosts({ _posts }) {
                                                     setShowPanel(a)
                                                 }}
                                                 _showPanel={showPanel}
+                                                _directShowPanel={
+                                                    commentPanelDirectPositive
+                                                }
                                             />
                                         </div>
                                     </div>
                                 ) : (
-                                    <>
-                                        <div className="text-blue-500">
-                                            <button
-                                                onClick={() => {
-                                                    const existed = {...showPanel}
-                                                    existed[postTokenId] = false
-                                                    setShowPanel(existed)
-                                                }}
-                                            >
-                                                Comments
-                                            </button>
-                                        </div>
-                                    </>
+                                    <PostBottomPart
+                                        _postSender={postSender}
+                                        _tokenId={postTokenId}
+                                        _setShowPanel={(a) => {
+                                            setShowPanel(a)
+                                        }}
+                                        _showPanel={showPanel}
+                                        _directShowPanel={
+                                            commentPanelDirectPositive
+                                        }
+                                    />
                                 )}
                             </>
                         )

@@ -1,5 +1,10 @@
 import { MdSell } from "react-icons/md"
-import { AiFillLike, AiOutlineLike, AiFillCloseCircle } from "react-icons/ai"
+import {
+    AiFillLike,
+    AiOutlineLike,
+    AiFillCloseCircle,
+    AiOutlineClose,
+} from "react-icons/ai"
 import { FaCommentAlt } from "react-icons/fa"
 import { RiSendPlaneFill } from "react-icons/ri"
 import { useEffect, useState } from "react"
@@ -29,6 +34,7 @@ export default function PostBottomPart({
     _tokenId,
     _showPanel,
     _setShowPanel,
+    _directShowPanel,
 }) {
     const { runContractFunction } = useWeb3Contract({})
     const [didWeLike, setDidWeLike] = useState(false)
@@ -246,11 +252,10 @@ export default function PostBottomPart({
     }
 
     async function handleCommentButtonClick(_tokenId) {
-        const empty = { ..._showPanel }
-        console.log(empty)
-        empty[_tokenId] = true
-        console.log(empty)
-        _setShowPanel(empty)
+        const old = { ..._showPanel }
+        old[_tokenId] = true
+        const updated = old
+        _setShowPanel(updated)
 
         const {
             data: dataFromQuery,
@@ -283,7 +288,7 @@ export default function PostBottomPart({
             return a["commentTokenId"] - b["commentTokenId"]
         })
 
-        const comments = sortedCommentMinteds.map(async function (
+        const _comments = sortedCommentMinteds.map(async function (
             commentMinted
         ) {
             const sender = commentMinted.from
@@ -317,10 +322,8 @@ export default function PostBottomPart({
             return commentInformation
         })
 
-        const resolvedComments = await Promise.all(comments)
-        const filteredComments = resolvedComments.filter((comment) => comment)
-
-        console.log(filteredComments)
+        const resolvedComments = await Promise.all(_comments)
+        const filteredComments = resolvedComments.filter((_comment) => _comment)
 
         setComments(filteredComments)
     }
@@ -409,8 +412,10 @@ export default function PostBottomPart({
 
     return (
         <>
-            <>
-                <div>
+            {console.log("hello")}
+            {console.log(comments)}
+            {_directShowPanel == false ? (
+                <>
                     <div className="flex p-4 justify-between">
                         <div className="flex items-center space-x-2">
                             <img
@@ -474,153 +479,158 @@ export default function PostBottomPart({
                             </div>
                         </div>
                     </div>
-                </div>
-            </>
-
-            {/* <div>
-            {showCommentPanel == false ? (
-                <div className="flex gap-5 justify-center">
-                    <button className="dark:text-white">
-                       
-                    </button>
-
-                    {didWeLike == true ? (
-                        <button
-                            className="dark:text-white"
-                            onClick={async () => {
-                                await handleUnClick(_tokenId)
-                            }}
-                        >
-                            <a>
-                                <AiFillLike size="50" />
-                            </a>
-                        </button>
-                    ) : (
-                        <button
-                            className="dark:text-white"
-                            onClick={async () => {
-                                await handleLikeClick(_tokenId)
-                            }}
-                        >
-                            <a>
-                                <AiOutlineLike size="50" />
-                            </a>
-                        </button>
-                    )}
-
-                    <button
-                        className="dark:text-white"
-                        onClick={async () => {
-                            await handleCommentButtonClick(_tokenId)
-                        }}
-                    >
-                        <FaCommentAlt size="50" />
-                    </button>
-                </div>
+                </>
             ) : (
-                <div className="">
-                    <div className="flex justify-center items-center">
-                        <div className=" flex flex-col bg-white shadow-md rounded w-full">
-                            <div className="flex flex-col">
-                                <div className="flex justify-center">
-                                    <div className="font-extrabold">
-                                        Comments
-                                    </div>
-                                </div>
-                                {comments == false ? (
-                                    <></>
-                                ) : (
-                                    <>
-                                        {comments.map(
-                                            (commentInformation, _index) => {
-                                                const sender =
-                                                    commentInformation.sender
+                <div className="flex flex-col my-5" style={{ height: "500px" }}>
+                    <div className="container w-11/12 mx-auto p-4 bg-gray-100 rounded-t-xl flex">
+                        <div className="container flex justify-start">
+                            <div>Comments</div>
+                        </div>
+                        <div className="container flex justify-end">
+                            <button
+                                onClick={() => {
+                                    const existed = { ..._showPanel }
+                                    existed[_tokenId] = false
+                                    const updated = existed
+                                    _setShowPanel(updated)
+                                }}
+                            >
+                                <AiFillCloseCircle size="20" />
+                            </button>
+                        </div>
+                    </div>
 
-                                                let shortSender
-                                                if (sender == "You") {
-                                                    shortSender = "You"
-                                                } else {
-                                                    shortSender = `${sender.slice(
-                                                        0,
-                                                        3
-                                                    )}..${sender.slice(
-                                                        sender.length - 3,
-                                                        sender.length
-                                                    )}`
-                                                }
+                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 overflow-y-scroll">
+                        <div className="text-blue-500">
+                            {Object.keys(comments).length > 0 ? (
+                                <ul className="space-y-4">
+                                    {comments.map(
+                                        (commentInformation, index) => {
+                                            const sender =
+                                                commentInformation.sender
 
-                                                const tokenId =
-                                                    commentInformation.tokenId
+                                            let shortSender
+                                            if (sender == "You") {
+                                                shortSender = "You"
+                                            } else {
+                                                shortSender = `${sender.slice(
+                                                    0,
+                                                    3
+                                                )}..${sender.slice(
+                                                    sender.length - 3,
+                                                    sender.length
+                                                )}`
+                                            }
 
-                                                const comment =
-                                                    commentInformation.content
+                                            const tokenId =
+                                                commentInformation.tokenId
 
-                                                return (
-                                                    <div key={_index}>
-                                                        {tokenId == "-1" ? (
-                                                            <>
-                                                                <div className="dark:text-black">
-                                                                    {`${_index}. ${shortSender}: ${comment}`}
-                                                                </div>
-                                                            </>
-                                                        ) : (
-                                                            <>
+                                            const comment =
+                                                commentInformation.content
+
+                                            return (
+                                                <>
+                                                    {tokenId != "-1" ? (
+                                                        <>
+                                                            <li
+                                                                key={index}
+                                                                className="flex space-x-2"
+                                                            >
                                                                 <a
                                                                     href={`https://testnets.opensea.io/assets/goerli/${smartContractAddress}/${tokenId}`}
                                                                     target="_blank"
                                                                 >
-                                                                    <div className="dark:text-black">
-                                                                        {`${_index}. ${shortSender}: ${comment}`}
+                                                                    <img
+                                                                        className="w-8 h-8 rounded-full bg-gray-200"
+                                                                        src={
+                                                                            profilePhoto
+                                                                        }
+                                                                    />
+                                                                    <div>
+                                                                        <span className="text-sm font-medium text-gray-900">
+                                                                            {
+                                                                                shortSender
+                                                                            }
+                                                                        </span>
+                                                                        <p className="text-sm text-gray-800">
+                                                                            {
+                                                                                comment
+                                                                            }
+                                                                        </p>
                                                                     </div>
                                                                 </a>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                )
-                                            }
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                            <div className="flex flex-col">
-                                <label
-                                    htmlFor="message"
-                                    className="block mb-2 text-gray-900 dark:text-black font-extrabold text-xl"
-                                >
-                                    Your Comment:
-                                </label>
-                                <textarea
-                                    id="message"
-                                    rows="3"
-                                    className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    onChange={(evt) => {
-                                        setComment(evt.target.value)
-                                    }}
-                                ></textarea>
-                                <div className="flex ml-auto">
-                                    <button
-                                        onClick={async () => {
-                                            await handleSendCommentButtonClick(
-                                                _tokenId
+                                                            </li>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <li
+                                                                key={index}
+                                                                className="flex space-x-2"
+                                                            >
+                                                                <img
+                                                                    className="w-8 h-8 rounded-full bg-gray-200"
+                                                                    src={
+                                                                        profilePhoto
+                                                                    }
+                                                                ></img>
+                                                                <div>
+                                                                    <span className="text-sm font-medium text-gray-900">
+                                                                        {
+                                                                            shortSender
+                                                                        }
+                                                                    </span>
+                                                                    <p className="text-sm text-gray-800">
+                                                                        {
+                                                                            comment
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            </li>
+                                                        </>
+                                                    )}
+                                                </>
                                             )
-                                        }}
-                                    >
-                                        <RiSendPlaneFill size="50" />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setShowCommentPanel(false)
-                                        }}
-                                    >
-                                        <AiFillCloseCircle size="50" />
-                                    </button>
-                                </div>
-                            </div>
+                                        }
+                                    )}
+                                </ul>
+                            ) : (
+                                <>
+                                    {console.log(comments)}
+                                    <p className="text-sm text-gray-400">
+                                        No comments yet.
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 rounded-b-xl">
+                        <div className="flex space-x-2">
+                            <img
+                                className="w-10 h-10 rounded-full"
+                                src={profilePhoto}
+                            ></img>
+                            <input
+                                type="text"
+                                placeholder="Add a comment..."
+                                onChange={(e) => {
+                                    setComment(e.target.value)
+                                }}
+                                className="flex-grow bg-transparent border-b-2 border-gray-200 text-sm text-gray-900 px-3 py-2 outline-none focus:border-blue-500"
+                            />
+                            <button
+                                type="button"
+                                className="text-blue-500 font-semibold"
+                                onClick={async () => {
+                                    await handleSendCommentButtonClick(_tokenId)
+                                }}
+                            >
+                                Post
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-        </div> */}
         </>
     )
 }
