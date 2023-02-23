@@ -3,6 +3,8 @@ import GetPosts from "@/components/getPosts"
 import CreateButton from "@/components/createButton"
 import { useMoralis } from "react-moralis"
 import UploadButton from "@/components/uploadImage"
+import Post from "@/components/Post"
+import ContractFunctionHandler from "@/components/ContractFunctions"
 
 export default function Home() {
     const { isWeb3Enabled, account } = useMoralis()
@@ -24,7 +26,7 @@ export default function Home() {
                         </div>
 
                         <div className="col-span-1">
-                            <GetPosts />
+                            <ContractFunctionHandler />
                         </div>
 
                         <div className="col-span-1 ml-auto">
