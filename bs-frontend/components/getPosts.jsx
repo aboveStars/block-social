@@ -28,7 +28,7 @@ export default function GetPosts() {
     const [smartContractAddress, setSmartContractAddress] = useState("")
 
     const memoReturnPosts = useMemo(
-        () => <ReturnPosts _posts={postsArray} />,
+        () => <Returnosts _posts={postsArray} />,
         [postsArray]
     )
 

@@ -27,7 +27,7 @@ import { FcLikePlaceholder, FcLike } from "react-icons/fc"
 import {
     addressToNumbers,
     loremPicsumPrefix,
-} from "@/utils/addressToImageNumber"
+} from "@/utils/addressToPp"
 
 export default function PostBottomPart({
     _postSender,

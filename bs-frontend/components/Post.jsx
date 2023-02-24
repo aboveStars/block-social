@@ -8,7 +8,7 @@ export default function Post(props) {
     )
 
     const [commentData, setCommentData] = useState(
-        props.comments || {
+        props.commentData || {
             comments: [
                 {
                     who: "0x3434",
@@ -36,9 +36,8 @@ export default function Post(props) {
 
     const postImageSource =
         props.postImageSource || "https://picsum.photos/2000"
-    const postTitle = props.imageTitle || "Nice Day!"
-    const postDescription =
-        props.postDescription || "I feel very good man like omg.."
+    const postTitle = props.postTitle || "Nice Day!"
+    const postDescription = props.postDescription || "No Description"
 
     const postTokenId = props.postTokenId || 0
     const postContractAddress =
@@ -75,8 +74,11 @@ export default function Post(props) {
                             </p>
                         </div>
 
-                        <img className="w-full h-80" src={postImageSource} />
-                        {"--------------"}
+                        <img
+                            className="object-cover"
+                            src={postImageSource}
+                        />
+
                         <div className="flex p-4 justify-between">
                             <a href={postSenderOpenSeaSource} target="_blank">
                                 <div className="flex items-center space-x-2">
@@ -161,10 +163,32 @@ export default function Post(props) {
                             </button>
                         </div>
                     </div>
-                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 overflow-y-scroll">
-                        <ul>
+                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 overflow-y-auto">
+                        <ul className="flex flex-col gap-2">
                             {commentData.comments.map((c, index) => (
-                                <li key={index}>{c.commentContent}</li>
+                                <li
+                                    className="flex space-x-2 bg-gray-200 items-center"
+                                    key={index}
+                                >
+                                    <a
+                                        href={c.whoOpenSeaSource}
+                                        target="_blank"
+                                        className="flex gap-2 items-center"
+                                    >
+                                        <img
+                                            className="w-8 h-8 rounded-full bg-gray-200"
+                                            src={c.whoProfilePhotoSource}
+                                        />
+                                        <div className="font-bold">
+                                            {c.who.slice(0, 4)}...
+                                        </div>
+                                    </a>
+                                    <div className="font-bold">:</div>
+
+                                    <a href={c.openSeaSource} target="_blank">
+                                        <div>{c.commentContent}</div>
+                                    </a>
+                                </li>
                             ))}
                         </ul>
                     </div>
