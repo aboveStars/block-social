@@ -10,7 +10,11 @@ export default function PostLineUp(props) {
                         maxHeight: "650px",
                     }}
                 >
-                    <div>{posts.map((post) => post)}</div>
+                    <ul>
+                        {posts.map((post, index) => (
+                            <li key={index}>{post}</li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </>

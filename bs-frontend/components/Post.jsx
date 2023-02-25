@@ -49,10 +49,14 @@ export default function Post(props) {
 
     const ourAccountImageSource =
         props.ourAccountImageSource || "https://picsum.photos/300"
+    const ourAccountAddress = props.ourAccountAddress
+    const ourAccountOpenSeaSource = props.ourAccountOpenSeaSource
 
-    const contractFunctionCaller = props.contraactFunctionCaller
+    const contractFunctionCaller = props.contractFunctionCaller
 
     const [showCommentPanel, setShowCommentPanel] = useState(false)
+
+    const [currentWrittenComment, setCurrentWrittenComment] = useState("")
 
     return (
         <>
@@ -74,10 +78,7 @@ export default function Post(props) {
                             </p>
                         </div>
 
-                        <img
-                            className="object-cover"
-                            src={postImageSource}
-                        />
+                        <img className="object-cover" src={postImageSource} />
 
                         <div className="flex p-4 justify-between">
                             <a href={postSenderOpenSeaSource} target="_blank">
@@ -123,10 +124,13 @@ export default function Post(props) {
                                 <div className="flex space-x-1 items-center">
                                     <button
                                         onClick={async () => {
+                                            console.log("We are in handleClick")
+                                            console.log(postTokenId)
                                             handleLikeActions(
                                                 !likeData.didWeLike,
                                                 setLikeData,
-                                                contractFunctionCaller
+                                                contractFunctionCaller,
+                                                postTokenId
                                             )
                                         }}
                                     >
@@ -193,7 +197,21 @@ export default function Post(props) {
                         </ul>
                     </div>
                     <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 rounded-b-xl">
-                        <div className="flex space-x-2">
+                        <form
+                            className="flex space-x-2"
+                            onSubmit={async (e) => {
+                                e.preventDefault()
+                                await handleCommentActions(
+                                    setCommentData,
+                                    contractFunctionCaller,
+                                    postTokenId,
+                                    currentWrittenComment,
+                                    ourAccountAddress,
+                                    ourAccountImageSource,
+                                    ourAccountOpenSeaSource
+                                )
+                            }}
+                        >
                             <img
                                 className="w-10 h-10 rounded-full"
                                 src={ourAccountImageSource}
@@ -202,20 +220,18 @@ export default function Post(props) {
                                 type="text"
                                 placeholder="Add a comment..."
                                 onChange={(e) => {
-                                    // setComment(e.target.value)
+                                    setCurrentWrittenComment(e.target.value)
                                 }}
                                 className="flex-grow bg-transparent border-b-2 border-gray-200 text-sm text-gray-900 px-3 py-2 outline-none focus:border-blue-500"
+                                required
                             />
                             <button
-                                type="button"
+                                type="submit"
                                 className="text-blue-500 font-semibold"
-                                onClick={async () => {
-                                    // await handleSendCommentButtonClick(_tokenId)
-                                }}
                             >
                                 Post
                             </button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             )}
@@ -226,23 +242,86 @@ export default function Post(props) {
 async function handleLikeActions(
     toLike,
     likeStateSetter,
-    contractFunctionCaller
+    contractFunctionCaller,
+    tokenId
 ) {
     if (toLike) {
-        console.log("Liked")
         likeStateSetter((prevState) => ({
             ...prevState,
             didWeLike: true,
-            likeCount: prevState.likeCount + 1,
+            likeCount: (Number(prevState.likeCount) + 1).toString(),
         }))
-        contractFunctionCaller("like")
+        console.log("We will call contractFunctionCaller now...")
+        try {
+            await contractFunctionCaller("like", tokenId)
+        } catch (error) {
+            console.log("Error While contract interaction.... aborting")
+            console.error(error)
+            likeStateSetter((prevState) => ({
+                ...prevState,
+                didWeLike: false,
+                likeCount: (Number(prevState.likeCount) - 1).toString(),
+            }))
+        }
     } else {
-        console.log("UnLiked")
         likeStateSetter((prevState) => ({
             ...prevState,
             didWeLike: false,
-            likeCount: prevState.likeCount - 1,
+            likeCount: (Number(prevState.likeCount) - 1).toString(),
         }))
-        await contractFunctionCaller("unLike")
+        console.log("We will call contractFunctionCaller now...")
+        try {
+            await contractFunctionCaller("unLike", tokenId)
+        } catch (error) {
+            console.log("Error on contract interaction, aborting....")
+            console.error(error)
+            likeStateSetter((prevState) => ({
+                ...prevState,
+                didWeLike: true,
+                likeCount: (Number(prevState.likeCount) + 1).toString(),
+            }))
+        }
+    }
+}
+
+async function handleCommentActions(
+    commentStateSetter,
+    contractFunctionCaller,
+    tokenId,
+    comment,
+    ourAddress,
+    ourAccountImageSource,
+    ourAccountOpenSeaSource
+) {
+    commentStateSetter((prevState) => {
+        const fakeComment = {
+            who: ourAddress,
+            whoProfilePhotoSource: ourAccountImageSource,
+            whoOpenSeaSource: ourAccountOpenSeaSource,
+            commentContent: comment,
+            openSeaSource: "https://testnets.opensea.io/",
+        }
+        const updatedCommentDueToCommenting = [...prevState.comments]
+        updatedCommentDueToCommenting.push(fakeComment)
+        return {
+            comments: updatedCommentDueToCommenting,
+            commentCount: (Number(prevState.commentCount) + 1).toString(),
+        }
+    })
+
+    try {
+        await contractFunctionCaller("sendingComment", tokenId, comment)
+    } catch (error) {
+        console.log("Error on contract interaction, aborting....")
+        console.error(error)
+
+        commentStateSetter((prevState) => {
+            const updatedCommentsDueToFail = [...prevState.comments]
+            updatedCommentsDueToFail.pop()
+            return {
+                comments: updatedCommentsDueToFail,
+                commentCount: (Number(prevState.commentCount) - 1).toString(),
+            }
+        })
     }
 }

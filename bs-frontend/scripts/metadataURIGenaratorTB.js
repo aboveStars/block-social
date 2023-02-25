@@ -1,3 +1,4 @@
+import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 import { metaDataTemplate } from "@/utils/metadataTemplate"
 import { sendJSONToIpfs } from "./pinataOperations"
 
@@ -35,9 +36,8 @@ export async function generateMetdataUriForTextBased(
     _messageMetaData.image = finalImageSource
 
     const metadataUri = await sendJSONToIpfs(_messageMetaData)
-    console.log(metadataUri)
-
-    return metadataUri
+    const prefixedUri = `${urlPrefixForIPFS}${metadataUri}`
+    return prefixedUri
 }
 
 async function generateMessageSVG(_messageToSend) {

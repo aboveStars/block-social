@@ -15,6 +15,7 @@ import {
     blockSocialAbi,
     contractNetworkInformations,
 } from "@/utils/approveOptions"
+import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB"
 
 export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
@@ -125,7 +126,7 @@ export default function PostRegulator(props) {
                 // ------------------------------------------------------
                 const postSender = m.from
                 const postSenderImageSource = addressToProfilePhoto(m.from)
-                const postSenderOpenSeaSource = `https://testnets.opensea.io/${account}`
+                const postSenderOpenSeaSource = `https://testnets.opensea.io/${m.from}`
                 // ------------------------------------------------------
                 let postMetadataURI
                 try {
@@ -157,11 +158,15 @@ export default function PostRegulator(props) {
                 // ------------------------------------------------------
 
                 const postOpenSeaSource = `${urlPrefixForOpensea}${postContractAddress}/${postTokenId}`
+                // ------------------------------------------------------
+
                 const ourAccountImageSource = addressToProfilePhoto(account)
+                const ourAccountAddress = account
+                const ourAccountOpenSeaSource = `https://testnets.opensea.io/${account}`
 
                 // ------------------------------------------------------
 
-                const contractFunctionCaller = undefined
+                const contractFunctionCaller = handleContractFunctions
 
                 return (
                     <Post
@@ -176,7 +181,9 @@ export default function PostRegulator(props) {
                         postTokenId={postTokenId}
                         postContractAddress={postContractAddress}
                         postOpenSeaSource={postOpenSeaSource}
+                        ourAccountAddress={ourAccountAddress}
                         ourAccountImageSource={ourAccountImageSource}
+                        ourAccountOpenSeaSource={ourAccountOpenSeaSource}
                         contractFunctionCaller={contractFunctionCaller}
                     />
                 )
@@ -195,7 +202,7 @@ export default function PostRegulator(props) {
         }
     }, [searchKeyword])
 
-    async function handleContractFunctions(action, tokenId) {
+    async function handleContractFunctions(action, tokenId, comment) {
         console.log("Contract Function request received")
 
         switch (action) {
@@ -211,16 +218,18 @@ export default function PostRegulator(props) {
                 approveOptionsForLike.params = {
                     _tokenId: tokenId,
                 }
-                console.log(approveOptionsForLike)
+
                 await runContractFunction({
                     params: approveOptionsForLike,
                     onError: (error) => {
                         console.error(error)
+                        throw error
                     },
                     onSuccess: () => {
                         console.log("You approved")
                     },
                 })
+                console.log("How dare you")
                 break
             case "unLike":
                 const approveOptionsForUnLike = { ...approveOptions }
@@ -234,11 +243,12 @@ export default function PostRegulator(props) {
                 approveOptionsForUnLike.params = {
                     _tokenId: tokenId,
                 }
-                console.log(approveOptionsForUnLike)
+
                 await runContractFunction({
                     params: approveOptionsForUnLike,
                     onError: (error) => {
                         console.error(error)
+                        throw error
                     },
                     onSuccess: () => {
                         console.log("You approved")
@@ -263,6 +273,7 @@ export default function PostRegulator(props) {
                     params: approveOptionsForLikeCount,
                     onError: (error) => {
                         console.error(error)
+                        throw error
                     },
                 })
 
@@ -287,6 +298,7 @@ export default function PostRegulator(props) {
                     params: _approveOptionsForLikeStatus,
                     onError: (error) => {
                         console.error(error)
+                        throw error
                     },
                 })
 
@@ -310,10 +322,44 @@ export default function PostRegulator(props) {
                     params: _approveOptionsForGettingUri,
                     onError: (error) => {
                         console.error(error)
+                        throw error
                     },
                 })
 
                 return tokenUri
+
+            case "sendingComment":
+                const _approveOptionsForComment = { ...approveOptions }
+
+                _approveOptionsForComment.abi = blockSocialAbi
+                _approveOptionsForComment.contractAddress =
+                    contractNetworkInformations["BlockSocial"][
+                        Web3.utils.hexToNumberString(chainId)
+                    ]
+                _approveOptionsForComment.functionName = "mintComment"
+
+                const uri = await generateMetdataUriForTextBased(
+                    `Comment for : #${tokenId}`,
+                    comment,
+                    comment
+                )
+
+                _approveOptionsForComment.params = {
+                    _tokenIdToComment: tokenId,
+                    _uri: uri,
+                }
+
+                await runContractFunction({
+                    params: _approveOptionsForComment,
+                    onError: (error) => {
+                        console.log("Error while minting comment")
+                        console.error(error)
+                        throw error
+                    },
+                    onSuccess: (results) => {
+                        // ... send notification...
+                    },
+                })
 
             default:
                 break
