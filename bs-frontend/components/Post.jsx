@@ -62,7 +62,7 @@ export default function Post(props) {
         <>
             {showCommentPanel === false ? (
                 <div className="flex justify-center items-center my-5">
-                    <div className="container w-11/12 bg-white rounded-xl shadow-lg transform transition duration-500 hover:shadow-2xl">
+                    <div className="container bg-white rounded-xl shadow-lg transform transition duration-500 hover:shadow-2xl">
                         <div>
                             <a href={postOpenSeaSource} target="_blank">
                                 <span className="text-white text-xs font-bold rounded-lg bg-green-500 inline-block mt-4 ml-4 py-1.5 px-4">

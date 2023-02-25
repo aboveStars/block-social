@@ -12,7 +12,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
 import ReturnLoading from "./returnLoading"
 import ReturnPosts from "./returnPosts"
-import ReturnSkeletons from "./returnSkeletons"
+import ReturnSkeletons from "./SkeletonComponent"
 
 export default function GetPosts() {
     const { chainId } = useMoralis()

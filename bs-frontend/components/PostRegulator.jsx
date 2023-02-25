@@ -26,7 +26,10 @@ export default function PostRegulator(props) {
     const { chainId, account } = useMoralis()
     const { runContractFunction } = useWeb3Contract({})
 
+    const [postsStatus, setPostStatus] = useState("NoStatusProvided")
+
     async function postComponentArrayCreator() {
+        setPostStatus("Preparing")
         const {
             data: dataFromQuery,
             error,
@@ -192,7 +195,7 @@ export default function PostRegulator(props) {
         const filteredMainPostComponentArray = mainPostComponentArray.filter(
             (a) => a
         )
-        console.log(filteredMainPostComponentArray)
+        setPostStatus("Ready")
         setPosts(filteredMainPostComponentArray)
     }
 
@@ -368,7 +371,7 @@ export default function PostRegulator(props) {
 
     return (
         <>
-            <PostLineUp posts={posts} />
+            <PostLineUp posts={posts} postsStatus={postsStatus} />
         </>
     )
 }
