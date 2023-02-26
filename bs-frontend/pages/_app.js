@@ -8,6 +8,9 @@ import React from "react"
 import { MoralisProvider } from "react-moralis"
 import { NotificationProvider } from "web3uikit"
 
+import { toast, ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
     uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.9",
@@ -16,6 +19,10 @@ export const apolloClient = new ApolloClient({
 export default function App({ Component, pageProps }) {
     return (
         <>
+            <ToastContainer
+                position={toast.POSITION.BOTTOM_LEFT}
+                theme="dark"
+            />
             <Head>
                 <title>Block Social</title>
                 <meta

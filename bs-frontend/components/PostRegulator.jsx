@@ -16,6 +16,9 @@ import {
     contractNetworkInformations,
 } from "@/utils/approveOptions"
 import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB"
+import { useNotification } from "web3uikit"
+
+import { Bounce, toast, Zoom } from "react-toastify"
 
 export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
@@ -27,6 +30,8 @@ export default function PostRegulator(props) {
     const { runContractFunction } = useWeb3Contract({})
 
     const [postsStatus, setPostStatus] = useState("NoStatusProvided")
+
+    const dispatch = useNotification()
 
     async function postComponentArrayCreator() {
         setPostStatus("Preparing")
@@ -206,8 +211,6 @@ export default function PostRegulator(props) {
     }, [searchKeyword])
 
     async function handleContractFunctions(action, tokenId, comment) {
-        console.log("Contract Function request received")
-
         switch (action) {
             case "like":
                 const approveOptionsForLike = { ...approveOptions }
@@ -222,17 +225,22 @@ export default function PostRegulator(props) {
                     _tokenId: tokenId,
                 }
 
-                await runContractFunction({
-                    params: approveOptionsForLike,
-                    onError: (error) => {
-                        console.error(error)
-                        throw error
-                    },
-                    onSuccess: () => {
-                        console.log("You approved")
-                    },
-                })
-                console.log("How dare you")
+                try {
+                    await runContractFunction({
+                        params: approveOptionsForLike,
+                        onError: (error) => {
+                            console.error(error)
+                            throw error
+                        },
+                        onSuccess: (results) =>
+                            handleApproveSuccess(results, "like"),
+                    })
+                } catch (error) {
+                    throw error
+                }
+
+                console.log("This will be used for test")
+
                 break
             case "unLike":
                 const approveOptionsForUnLike = { ...approveOptions }
@@ -253,10 +261,10 @@ export default function PostRegulator(props) {
                         console.error(error)
                         throw error
                     },
-                    onSuccess: () => {
-                        console.log("You approved")
-                    },
+                    onSuccess: (results) =>
+                        handleApproveSuccess(results, "unLike"),
                 })
+                console.log("This will be used for test")
 
                 break
             case "likeCount":
@@ -359,14 +367,118 @@ export default function PostRegulator(props) {
                         console.error(error)
                         throw error
                     },
-                    onSuccess: (results) => {
-                        // ... send notification...
-                    },
+                    onSuccess: (results) =>
+                        handleApproveSuccess(results, "Comment Sending"),
                 })
+                console.log("This will be used for test")
 
             default:
                 break
         }
+    }
+
+    async function handleApproveSuccess(tx, isForWhat) {
+        toast.info(
+            `View "${
+                isForWhat == "like" ? "❤️" : isForWhat == "unLike" ? "💔" : "💬"
+            }"  transaction on Etherscan`,
+            {
+                closeButton: (
+                    <button
+                        type="button"
+                        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                        onClick={() => {
+                            window.open(
+                                `https://goerli.etherscan.io/tx/${tx.hash.toString()}`,
+                                "_blank"
+                            )
+                        }}
+                    >
+                        View
+                    </button>
+                ),
+                autoClose: 30000,
+                transition: Zoom,
+            }
+        )
+        handleNewNotification(
+            "warning",
+            `Transaction in Progress 🚀`,
+            `"${
+                isForWhat == "like" ? "❤️" : isForWhat == "unLike" ? "💔" : "💬"
+            }" Waiting for Confirmations`
+        )
+
+        console.log(
+            `%cWaiting Confirmaitons ==> %c${isForWhat} ==> %chttps://goerli.etherscan.io/tx/${tx.hash.toString()}`,
+            `color : #19EEEE`,
+            `color : #FF8B00 `,
+            `color : #EC5AE7`
+        )
+
+        try {
+            await tx.wait(1)
+        } catch (error) {
+            handleNewNotification(
+                "error",
+                "Transaction Couldn't Confirmed!",
+                "Error While Action Confirming"
+            )
+
+            toast.error(
+                `"${
+                    isForWhat == "like"
+                        ? "❤️"
+                        : isForWhat == "unLike"
+                        ? "💔"
+                        : "💬"
+                }" Transaction Failed`,
+                {
+                    closeButton: (
+                        <button
+                            type="button"
+                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                            onClick={() => {
+                                window.open(
+                                    `https://goerli.etherscan.io/tx/${tx.hash.toString()}`,
+                                    "_blank"
+                                )
+                            }}
+                        >
+                            Analyze
+                        </button>
+                    ),
+                    autoClose: false,
+                    transition: Bounce,
+                }
+            )
+
+            console.error(error)
+            return
+        }
+
+        handleNewNotification(
+            "success",
+            `Transaction Confirmed! 🥳`,
+            `"${
+                isForWhat == "like" ? "❤️" : isForWhat == "unLike" ? "💔" : "💬"
+            }" Action Successfully Sent!`
+        )
+
+        console.log(
+            `%cConfirmed ==> %c${isForWhat}`,
+            `color: #0DE54B`,
+            `color: #FF8B00`
+        )
+    }
+
+    function handleNewNotification(_type, _title, _message) {
+        dispatch({
+            type: _type,
+            message: _message,
+            title: _title,
+            position: "topR",
+        })
     }
 
     return (

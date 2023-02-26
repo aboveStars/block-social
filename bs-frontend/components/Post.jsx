@@ -124,8 +124,6 @@ export default function Post(props) {
                                 <div className="flex space-x-1 items-center">
                                     <button
                                         onClick={async () => {
-                                            console.log("We are in handleClick")
-                                            console.log(postTokenId)
                                             handleLikeActions(
                                                 !likeData.didWeLike,
                                                 setLikeData,
@@ -251,7 +249,7 @@ async function handleLikeActions(
             didWeLike: true,
             likeCount: (Number(prevState.likeCount) + 1).toString(),
         }))
-        console.log("We will call contractFunctionCaller now...")
+
         try {
             await contractFunctionCaller("like", tokenId)
         } catch (error) {
@@ -269,7 +267,7 @@ async function handleLikeActions(
             didWeLike: false,
             likeCount: (Number(prevState.likeCount) - 1).toString(),
         }))
-        console.log("We will call contractFunctionCaller now...")
+
         try {
             await contractFunctionCaller("unLike", tokenId)
         } catch (error) {
