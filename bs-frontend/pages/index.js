@@ -3,6 +3,7 @@ import CreateButton from "@/components/createButton"
 import { useMoralis } from "react-moralis"
 import UploadButton from "@/components/uploadImage"
 import MidPanel from "@/components/MidPanel"
+import LeftPanel from "@/components/LeftPanel"
 
 export default function Home() {
     const { isWeb3Enabled, account } = useMoralis()
@@ -13,14 +14,7 @@ export default function Home() {
                 <div className="bg-black h-screen">
                     <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-1 p-16">
                         <div className="col-span-1">
-                            <a href="http://localhost:3000/">
-                                <h1 className="text-white text-3xl font-bold tracking-tight text-shadow-lg ">
-                                    BlockSocial
-                                </h1>
-                            </a>
-
-                            <CreateButton />
-                            <UploadButton />
+                            <LeftPanel />
                         </div>
 
                         <div className="col-span-1">

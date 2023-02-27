@@ -1,4 +1,3 @@
-import PostLineUp from "./PostLineUp"
 import Web3 from "web3"
 import { useEffect, useState } from "react"
 import { apolloClient } from "@/pages/_app"
@@ -19,6 +18,7 @@ import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB
 import { useNotification } from "web3uikit"
 
 import { Bounce, toast, Zoom } from "react-toastify"
+import PostLineUp from "./PostLineUp"
 
 export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
@@ -34,7 +34,7 @@ export default function PostRegulator(props) {
     const dispatch = useNotification()
 
     async function postComponentArrayCreator() {
-        setPostStatus("Preparing")
+        setPostStatus((a) => "Preparing")
         const {
             data: dataFromQuery,
             error,
@@ -200,7 +200,7 @@ export default function PostRegulator(props) {
         const filteredMainPostComponentArray = mainPostComponentArray.filter(
             (a) => a
         )
-        setPostStatus("Ready")
+        setPostStatus((a) => "Ready")
         setPosts(filteredMainPostComponentArray)
     }
 

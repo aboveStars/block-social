@@ -1,7 +1,8 @@
 import axios from "axios"
 import { pinataFileUrl, pinataJSONUrl } from "@/utils/pinataStuffs"
+import { urlPrefixForIPFS } from "@/utils/ipfsStuffs"
 
-/** Send to IPFS whatever you want except JSON, returns IpfsHash
+/** Send to IPFS whatever you want except JSON, returns Ipfs Link
  */
 export async function sendFileToIpfs(_file) {
     const formData = new FormData()
@@ -34,10 +35,11 @@ export async function sendFileToIpfs(_file) {
         console.error(error.message)
         return
     }
-    return ipfsHash
+    const result = `${urlPrefixForIPFS}${ipfsHash}`
+    return result
 }
 
-/** Send to JSON to IPFS, returns IpfsHash
+/** Send to JSON to IPFS, returns Ipfs Link
  * @param {JSON} _json
  */
 export async function sendJSONToIpfs(_json) {
@@ -70,5 +72,7 @@ export async function sendJSONToIpfs(_json) {
         return
     }
 
-    return ipfsHash
+    const final = `${urlPrefixForIPFS}${ipfsHash}`
+
+    return final
 }

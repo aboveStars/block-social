@@ -1,6 +1,6 @@
-import Skeletons from "./SkeletonComponent"
-import ReturnSkeletons from "./SkeletonComponent"
-import Spinner from "./SpinnerComponent"
+import Skeletons from "../SkeletonComponent"
+import ReturnSkeletons from "../SkeletonComponent"
+import Spinner from "../SpinnerComponent"
 
 export default function PostLineUp(props) {
     const posts = props.posts

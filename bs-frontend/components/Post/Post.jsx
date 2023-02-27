@@ -72,7 +72,11 @@ export default function Post(props) {
                             </p>
                         </div>
 
-                        <img className="object-cover" src={postImageSource} />
+                        <img
+                            id="PostImage"
+                            className="object-cover"
+                            src={postImageSource}
+                        />
 
                         <div className="flex p-3 justify-between">
                             <button
@@ -164,8 +168,8 @@ export default function Post(props) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col my-5" style={{ height: "500px" }}>
-                    <div className="container w-11/12 mx-auto p-4 bg-gray-100 rounded-t-xl flex">
+                <div className="flex flex-col my-5" style={{ maxHeight: "500px" }}>
+                    <div className="container mx-auto p-4 bg-gray-100 rounded-t-xl flex">
                         <div className="container flex justify-start">
                             <div className="font-bold">Comments</div>
                         </div>
@@ -179,7 +183,7 @@ export default function Post(props) {
                             </button>
                         </div>
                     </div>
-                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 overflow-y-auto">
+                    <div className="container mx-auto p-4 space-y-4 bg-gray-100 overflow-y-auto">
                         <ul className="flex flex-col gap-2">
                             {commentData.comments.map((c, index) => (
                                 <li
@@ -208,7 +212,7 @@ export default function Post(props) {
                             ))}
                         </ul>
                     </div>
-                    <div className="container w-11/12 mx-auto p-4 space-y-4 bg-gray-100 rounded-b-xl">
+                    <div className="container mx-auto p-4 space-y-4 bg-gray-100 rounded-b-xl">
                         <form
                             className="flex space-x-2"
                             onSubmit={async (e) => {

@@ -36,8 +36,7 @@ export async function generateMetdataUriForTextBased(
     _messageMetaData.image = finalImageSource
 
     const metadataUri = await sendJSONToIpfs(_messageMetaData)
-    const prefixedUri = `${urlPrefixForIPFS}${metadataUri}`
-    return prefixedUri
+    return metadataUri
 }
 
 async function generateMessageSVG(_messageToSend) {

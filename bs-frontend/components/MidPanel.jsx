@@ -1,5 +1,6 @@
 import { useState } from "react"
-import PostRegulator from "./PostRegulator"
+import PostRegulator from "./Post/PostRegulator"
+
 import SearchPanel from "./SearchPanel"
 
 export default function MidPanel() {
