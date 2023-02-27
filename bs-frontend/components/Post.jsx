@@ -64,12 +64,6 @@ export default function Post(props) {
                 <div className="flex justify-center items-center my-5">
                     <div className="container bg-white rounded-xl shadow-lg transform transition duration-500 hover:shadow-2xl">
                         <div>
-                            <a href={postOpenSeaSource} target="_blank">
-                                <span className="text-white text-xs font-bold rounded-lg bg-green-500 inline-block mt-4 ml-4 py-1.5 px-4">
-                                    Buy
-                                </span>
-                            </a>
-
                             <h1 className="text-2xl mt-2 ml-4 font-bold text-gray-800 hover:text-gray-900 transition duration-100 overflow-hidden overflow-ellipsis">
                                 {postTitle}
                             </h1>
@@ -80,19 +74,39 @@ export default function Post(props) {
 
                         <img className="object-cover" src={postImageSource} />
 
-                        <div className="flex p-4 justify-between">
-                            <a href={postSenderOpenSeaSource} target="_blank">
-                                <div className="flex items-center space-x-2">
+                        <div className="flex p-3 justify-between">
+                            <button
+                                className="flex items-center space-x-2"
+                                onClick={() => {
+                                    window.open(
+                                        postSenderOpenSeaSource,
+                                        "_blank"
+                                    )
+                                }}
+                            >
+                                <img
+                                    className="w-10 rounded-full"
+                                    src={postSenderImageSource}
+                                    alt={postSender}
+                                />
+                                <h2 className="text-gray-800 font-bold cursor-pointer overflow-hidden overflow-ellipsis w-14">
+                                    {postSender}
+                                </h2>
+                            </button>
+
+                            <div className="flex justify-center items-center mr-5">
+                                <button
+                                    onClick={() => {
+                                        window.open(postOpenSeaSource, "_blank")
+                                    }}
+                                    className="w-24"
+                                >
                                     <img
-                                        className="w-10 rounded-full"
-                                        src={postSenderImageSource}
-                                        alt={postSender}
+                                        src="https://storage.googleapis.com/opensea-static/Logomark/OpenSea-Full-Logo%20(dark).svg"
+                                        className="object-cover"
                                     />
-                                    <h2 className="text-gray-800 font-bold cursor-pointer overflow-hidden overflow-ellipsis w-14">
-                                        {postSender}
-                                    </h2>
-                                </div>
-                            </a>
+                                </button>
+                            </div>
 
                             <div className="flex space-x-2">
                                 <div className="flex space-x-1 items-center">
