@@ -235,8 +235,6 @@ export default function Post(props) {
                                     }
                                 )
 
-                                console.log(imgData)
-
                                 const byteString = atob(imgData.split(",")[1])
                                 const mimeString = imgData
                                     .split(",")[0]

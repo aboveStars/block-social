@@ -286,11 +286,18 @@ export default function SendPost() {
                                 </button>
                             </div>
                         </form>
-                       
                     </>
                 ) : (
                     <></>
                 )}
+            </div>
+            <div
+                ref={containerRef}
+                className="fixed top-0 left-0 -z-10 flex w-96 h-96 items-center justify-center bg-black text-white"
+            >
+                <p className="break-words font-thin">
+                    {currentPostCreationData.description}
+                </p>
             </div>
         </>
     )
