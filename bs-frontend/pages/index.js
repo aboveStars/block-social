@@ -1,7 +1,5 @@
 import { ConnectButton } from "web3uikit"
-import CreateButton from "@/components/createButton"
 import { useMoralis } from "react-moralis"
-import UploadButton from "@/components/uploadImage"
 import MidPanel from "@/components/MidPanel"
 import LeftPanel from "@/components/LeftPanel"
 

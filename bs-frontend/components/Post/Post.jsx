@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { FcLikePlaceholder, FcLike } from "react-icons/fc"
 import { AiFillCloseCircle } from "react-icons/ai"
+import html2canvas from "html2canvas"
 
 export default function Post(props) {
     const [likeData, setLikeData] = useState(
@@ -38,6 +39,7 @@ export default function Post(props) {
         props.postImageSource || "https://picsum.photos/2000"
     const postTitle = props.postTitle || "Nice Day!"
     const postDescription = props.postDescription || "No Description"
+    const postTextOnly = props.postTextOnly || "false"
 
     const postTokenId = props.postTokenId || 0
     const postContractAddress =
@@ -58,6 +60,8 @@ export default function Post(props) {
 
     const [currentWrittenComment, setCurrentWrittenComment] = useState("")
 
+    const containerRef = useRef(null)
+
     return (
         <>
             {showCommentPanel === false ? (
@@ -71,12 +75,15 @@ export default function Post(props) {
                                 {postDescription}
                             </p>
                         </div>
-
-                        <img
-                            id="PostImage"
-                            className="object-cover"
-                            src={postImageSource}
-                        />
+                        {postTextOnly === "false" ? (
+                            <img
+                                id="PostImage"
+                                className="object-cover"
+                                src={postImageSource}
+                            />
+                        ) : (
+                            <></>
+                        )}
 
                         <div className="flex p-3 justify-between">
                             <button
@@ -168,7 +175,10 @@ export default function Post(props) {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col my-5" style={{ maxHeight: "500px" }}>
+                <div
+                    className="flex flex-col my-5"
+                    style={{ maxHeight: "500px" }}
+                >
                     <div className="container mx-auto p-4 bg-gray-100 rounded-t-xl flex">
                         <div className="container flex justify-start">
                             <div className="font-bold">Comments</div>
@@ -217,11 +227,36 @@ export default function Post(props) {
                             className="flex space-x-2"
                             onSubmit={async (e) => {
                                 e.preventDefault()
+
+                                let imgData
+                                await html2canvas(containerRef.current).then(
+                                    (canvas) => {
+                                        imgData = canvas.toDataURL()
+                                    }
+                                )
+
+                                console.log(imgData)
+
+                                const byteString = atob(imgData.split(",")[1])
+                                const mimeString = imgData
+                                    .split(",")[0]
+                                    .split(":")[1]
+                                    .split(";")[0]
+                                const ab = new ArrayBuffer(byteString.length)
+                                const ia = new Uint8Array(ab)
+                                for (let i = 0; i < byteString.length; i++) {
+                                    ia[i] = byteString.charCodeAt(i)
+                                }
+                                const file = new Blob([ab], {
+                                    type: mimeString,
+                                })
+
                                 await handleCommentActions(
                                     setCommentData,
                                     contractFunctionCaller,
                                     postTokenId,
                                     currentWrittenComment,
+                                    file,
                                     ourAccountAddress,
                                     ourAccountImageSource,
                                     ourAccountOpenSeaSource
@@ -251,6 +286,13 @@ export default function Post(props) {
                     </div>
                 </div>
             )}
+
+            <div
+                ref={containerRef}
+                className="fixed top-0 left-0 -z-10 flex w-96 h-96 items-center justify-center bg-black text-white"
+            >
+                <p className="break-words font-thin">{currentWrittenComment}</p>
+            </div>
         </>
     )
 }
@@ -305,6 +347,7 @@ async function handleCommentActions(
     contractFunctionCaller,
     tokenId,
     comment,
+    commentFile,
     ourAddress,
     ourAccountImageSource,
     ourAccountOpenSeaSource
@@ -326,7 +369,12 @@ async function handleCommentActions(
     })
 
     try {
-        await contractFunctionCaller("sendingComment", tokenId, comment)
+        await contractFunctionCaller(
+            "sendingComment",
+            tokenId,
+            comment,
+            commentFile
+        )
     } catch (error) {
         console.log("Error on contract interaction, aborting....")
         console.error(error)

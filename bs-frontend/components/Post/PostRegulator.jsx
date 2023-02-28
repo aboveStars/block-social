@@ -14,11 +14,12 @@ import {
     blockSocialAbi,
     contractNetworkInformations,
 } from "@/utils/approveOptions"
-import { generateMetdataUriForTextBased } from "@/scripts/metadataURIGenaratorTB"
 import { useNotification } from "web3uikit"
 
 import { Bounce, toast, Zoom } from "react-toastify"
 import PostLineUp from "./PostLineUp"
+import { metaDataTemplate } from "@/utils/metadataTemplate"
+import { sendFileToIpfs, sendJSONToIpfs } from "@/scripts/pinataOperations"
 
 export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
@@ -159,6 +160,7 @@ export default function PostRegulator(props) {
                 const postImageSource = postMetadata.image
                 const postTitle = postMetadata.name
                 const postDescription = postMetadata.description
+                const postTextOnly = postMetadata.textOnly // !!!!!!!!!!!!!!!!
                 // --------------------------------------------------------
 
                 const postTokenId = m.tokenId
@@ -186,6 +188,7 @@ export default function PostRegulator(props) {
                         postImageSource={postImageSource}
                         postTitle={postTitle}
                         postDescription={postDescription}
+                        postTextOnly={postTextOnly}
                         postTokenId={postTokenId}
                         postContractAddress={postContractAddress}
                         postOpenSeaSource={postOpenSeaSource}
@@ -210,7 +213,12 @@ export default function PostRegulator(props) {
         }
     }, [searchKeyword])
 
-    async function handleContractFunctions(action, tokenId, comment) {
+    async function handleContractFunctions(
+        action,
+        tokenId,
+        comment,
+        commentFile
+    ) {
         switch (action) {
             case "like":
                 const approveOptionsForLike = { ...approveOptions }
@@ -349,15 +357,28 @@ export default function PostRegulator(props) {
                     ]
                 _approveOptionsForComment.functionName = "mintComment"
 
-                const uri = await generateMetdataUriForTextBased(
-                    `Comment for : #${tokenId}`,
-                    comment,
-                    comment
-                )
+                const finalImageSource = await sendFileToIpfs(commentFile)
+                console.log(finalImageSource)
+
+                let _messageMetaData = { ...metaDataTemplate }
+                _messageMetaData.name = `Comment for : #${tokenId}`
+                _messageMetaData.description = comment
+                _messageMetaData.attributes[0] = {
+                    trait_Type: "Impact",
+                    value: 53,
+                }
+                _messageMetaData.image = finalImageSource
+                _messageMetaData.textOnly = "true"
+
+                console.log(_messageMetaData)
+
+                const metadataUri = await sendJSONToIpfs(_messageMetaData)
+
+                console.log(metadataUri)
 
                 _approveOptionsForComment.params = {
                     _tokenIdToComment: tokenId,
-                    _uri: uri,
+                    _uri: metadataUri,
                 }
 
                 await runContractFunction({

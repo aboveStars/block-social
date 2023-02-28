@@ -8,8 +8,9 @@ const metaDataTemplate = {
             value: 0,
         },
     ],
+    textOnly: "false",
 }
 
 module.exports = {
-    metaDataTemplate
+    metaDataTemplate,
 }

@@ -5,17 +5,18 @@ import {
     contractNetworkInformations,
 } from "@/utils/approveOptions"
 import { metaDataTemplate } from "@/utils/metadataTemplate"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { BsPlusCircle } from "react-icons/bs"
 import { useMoralis, useWeb3Contract } from "react-moralis"
 import Web3 from "web3"
 import { useNotification } from "web3uikit"
 import { Bounce, toast, Zoom } from "react-toastify"
+import html2canvas from "html2canvas"
 
 export default function SendPost() {
     const [currentPostCreationData, setCurrentPostCreationData] = useState({
         title: "title",
-        image: File,
+        image: "noImage",
         description: "description",
     })
     const [showPanel, setShowPanel] = useState(false)
@@ -26,10 +27,38 @@ export default function SendPost() {
 
     const dispatch = useNotification()
 
+    const containerRef = useRef(null)
+
     async function handleSubmit() {
         setShowPanel((a) => false)
+
         const file = currentPostCreationData.image
-        const imageURI = await sendFileToIpfs(file)
+        let textOnly
+
+        let imageURI
+        if (file != "noImage") {
+            textOnly = "false"
+            console.log("Image Found")
+            imageURI = await sendFileToIpfs(file)
+        } else {
+            textOnly = "true"
+            console.log("Image Not Found...")
+            let imgData
+            await html2canvas(containerRef.current).then((canvas) => {
+                imgData = canvas.toDataURL()
+            })
+
+            const byteString = atob(imgData.split(",")[1])
+            const mimeString = imgData.split(",")[0].split(":")[1].split(";")[0]
+            const ab = new ArrayBuffer(byteString.length)
+            const ia = new Uint8Array(ab)
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i)
+            }
+            const file = new Blob([ab], { type: mimeString })
+            imageURI = await sendFileToIpfs(file)
+            console.log(imageURI)
+        }
 
         const imageMetadata = { ...metaDataTemplate }
         imageMetadata.name = currentPostCreationData.title
@@ -39,6 +68,8 @@ export default function SendPost() {
             value: "53",
         }
         imageMetadata.image = imageURI
+        imageMetadata.textOnly = textOnly
+
         const json = imageMetadata
 
         const metadataURI = await sendJSONToIpfs(json)
@@ -164,90 +195,99 @@ export default function SendPost() {
                     </div>
                 </button>
                 {showPanel == true ? (
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            handleSubmit()
-                        }}
-                    >
-                        <div className="rounded-2xl bg-gray-900 shadow-lg p-6 text-gray-100 w-2/3 flex flex-col gap-2">
-                            <div className="mb-4">
-                                <label
-                                    htmlFor="title"
-                                    className="block font-bold mb-2"
-                                >
-                                    Title
-                                </label>
-                                <input
-                                    type="text"
-                                    id="title"
-                                    className="appearance-none border rounded-xl w-full py-2 px-3 leading-tight bg-gray-700 focus:outline-none focus:shadow-outline text-gray-100"
-                                    placeholder="Enter title here"
-                                    onChange={(e) => {
-                                        setCurrentPostCreationData((prev) => ({
-                                            ...prev,
-                                            title: e.target.value,
-                                        }))
-                                    }}
-                                    required
-                                />
-                            </div>
-
-                            <div className="max-w-2xl mx-auto">
-                                <div className="flex gap-2">
+                    <>
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault()
+                                handleSubmit()
+                            }}
+                        >
+                            <div className="rounded-2xl bg-gray-900 shadow-lg p-6 text-gray-100 w-2/3 flex flex-col gap-2">
+                                <div className="mb-4">
                                     <label
-                                        className="block mb-2 text-md font-extrabold text-gray-900 dark:text-gray-300"
-                                        for="file_input"
+                                        htmlFor="title"
+                                        className="block font-bold mb-2"
                                     >
-                                        Photo
+                                        Title
                                     </label>
-                                    <div className="text-white font-thin">
-                                        (Optional)
-                                    </div>
+                                    <input
+                                        type="text"
+                                        id="title"
+                                        className="appearance-none border rounded-xl w-full py-2 px-3 leading-tight bg-gray-700 focus:outline-none focus:shadow-outline text-gray-100"
+                                        placeholder="Enter title here"
+                                        onChange={(e) => {
+                                            setCurrentPostCreationData(
+                                                (prev) => ({
+                                                    ...prev,
+                                                    title: e.target.value,
+                                                })
+                                            )
+                                        }}
+                                        required
+                                    />
                                 </div>
 
-                                <input
-                                    className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                    id="file_input"
-                                    type="file"
-                                    onChange={(e) => {
-                                        setCurrentPostCreationData((prev) => ({
-                                            ...prev,
-                                            image: e.target.files[0],
-                                        }))
-                                    }}
-                                />
-                            </div>
-                            <div className="mb-4 mt-4">
-                                <label
-                                    htmlFor="description"
-                                    className="block font-bold mb-2"
-                                >
-                                    Description
-                                </label>
-                                <textarea
-                                    id="description"
-                                    className="appearance-none border rounded-xl w-full py-2 px-3 leading-tight bg-gray-700 focus:outline-none focus:shadow-outline text-gray-100"
-                                    rows="4"
-                                    placeholder="Enter description here"
-                                    onChange={(e) => {
-                                        setCurrentPostCreationData((prev) => ({
-                                            ...prev,
-                                            description: e.target.value,
-                                        }))
-                                    }}
-                                    required
-                                />
-                            </div>
+                                <div className="max-w-2xl mx-auto">
+                                    <div className="flex gap-2">
+                                        <label
+                                            className="block mb-2 text-md font-extrabold text-gray-900 dark:text-gray-300"
+                                            htmlFor="file_input"
+                                        >
+                                            Photo
+                                        </label>
+                                        <div className="text-white font-thin">
+                                            (Optional)
+                                        </div>
+                                    </div>
 
-                            <button
-                                className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                type="submit"
-                            >
-                                Send Post
-                            </button>
-                        </div>
-                    </form>
+                                    <input
+                                        className="block w-full text-md text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                                        id="file_input"
+                                        type="file"
+                                        onChange={(e) => {
+                                            setCurrentPostCreationData(
+                                                (prev) => ({
+                                                    ...prev,
+                                                    image: e.target.files[0],
+                                                })
+                                            )
+                                        }}
+                                    />
+                                </div>
+                                <div className="mb-4 mt-4">
+                                    <label
+                                        htmlFor="description"
+                                        className="block font-bold mb-2"
+                                    >
+                                        Description
+                                    </label>
+                                    <textarea
+                                        id="description"
+                                        className="appearance-none border rounded-xl w-full py-2 px-3 leading-tight bg-gray-700 focus:outline-none focus:shadow-outline text-gray-100"
+                                        rows="4"
+                                        placeholder="Enter description here"
+                                        onChange={(e) => {
+                                            setCurrentPostCreationData(
+                                                (prev) => ({
+                                                    ...prev,
+                                                    description: e.target.value,
+                                                })
+                                            )
+                                        }}
+                                        required
+                                    />
+                                </div>
+
+                                <button
+                                    className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    type="submit"
+                                >
+                                    Send Post
+                                </button>
+                            </div>
+                        </form>
+                       
+                    </>
                 ) : (
                     <></>
                 )}
