@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { FcLikePlaceholder, FcLike } from "react-icons/fc"
 import { AiFillCloseCircle } from "react-icons/ai"
 import html2canvas from "html2canvas"
+import { CircularProgress } from "@mui/material"
 
 export default function Post(props) {
     const [likeData, setLikeData] = useState(
@@ -61,6 +62,8 @@ export default function Post(props) {
     const [currentWrittenComment, setCurrentWrittenComment] = useState("")
 
     const containerRef = useRef(null)
+
+    const [sendCommentStatus, setSendCommentStatus] = useState("clear")
 
     return (
         <>
@@ -177,7 +180,7 @@ export default function Post(props) {
             ) : (
                 <div
                     className="flex flex-col my-5"
-                    style={{ maxHeight: "500px" }}
+                    style={{ maxHeight: "650px" }}
                 >
                     <div className="container mx-auto p-4 bg-gray-100 rounded-t-xl flex">
                         <div className="container flex justify-start">
@@ -197,13 +200,21 @@ export default function Post(props) {
                         <ul className="flex flex-col gap-2">
                             {commentData.comments.map((c, index) => (
                                 <li
-                                    className="flex space-x-2 bg-gray-200 items-center"
+                                    className={`flex space-x-2  ${
+                                        c.who == ourAccountAddress
+                                            ? "bg-gray-200"
+                                            : ""
+                                    }  items-center`}
                                     key={index}
                                 >
-                                    <a
-                                        href={c.whoOpenSeaSource}
-                                        target="_blank"
+                                    <button
                                         className="flex gap-2 items-center"
+                                        onClick={() => {
+                                            window.open(
+                                                c.whoOpenSeaSource,
+                                                "_blank"
+                                            )
+                                        }}
                                     >
                                         <img
                                             className="w-8 h-8 rounded-full bg-gray-200"
@@ -212,12 +223,20 @@ export default function Post(props) {
                                         <div className="font-bold">
                                             {c.who.slice(0, 4)}...
                                         </div>
-                                    </a>
+                                    </button>
+
                                     <div className="font-bold">:</div>
 
-                                    <a href={c.openSeaSource} target="_blank">
+                                    <button
+                                        onClick={() => {
+                                            window.open(
+                                                c.openSeaSource,
+                                                "blank"
+                                            )
+                                        }}
+                                    >
                                         <div>{c.commentContent}</div>
-                                    </a>
+                                    </button>
                                 </li>
                             ))}
                         </ul>
@@ -227,7 +246,7 @@ export default function Post(props) {
                             className="flex space-x-2"
                             onSubmit={async (e) => {
                                 e.preventDefault()
-
+                                setSendCommentStatus("sending")
                                 let imgData
                                 await html2canvas(containerRef.current).then(
                                     (canvas) => {
@@ -257,8 +276,11 @@ export default function Post(props) {
                                     file,
                                     ourAccountAddress,
                                     ourAccountImageSource,
-                                    ourAccountOpenSeaSource
+                                    ourAccountOpenSeaSource,
+                                    setSendCommentStatus
                                 )
+
+                                setCurrentWrittenComment("")
                             }}
                         >
                             <img
@@ -273,13 +295,25 @@ export default function Post(props) {
                                 }}
                                 className="flex-grow bg-transparent border-b-2 border-gray-200 text-sm text-gray-900 px-3 py-2 outline-none focus:border-blue-500"
                                 required
+                                value={currentWrittenComment}
+                                disabled={sendCommentStatus != "clear"}
                             />
-                            <button
-                                type="submit"
-                                className="text-blue-500 font-semibold"
-                            >
-                                Post
-                            </button>
+                            {sendCommentStatus == "clear" ? (
+                                <>
+                                    <button
+                                        type="submit"
+                                        className="text-blue-500 font-semibold"
+                                    >
+                                        Send
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <CircularProgress />
+                                    </div>
+                                </>
+                            )}
                         </form>
                     </div>
                 </div>
@@ -348,7 +382,8 @@ async function handleCommentActions(
     commentFile,
     ourAddress,
     ourAccountImageSource,
-    ourAccountOpenSeaSource
+    ourAccountOpenSeaSource,
+    sendCommentStatusStater
 ) {
     commentStateSetter((prevState) => {
         const fakeComment = {
@@ -374,6 +409,7 @@ async function handleCommentActions(
             commentFile
         )
     } catch (error) {
+        sendCommentStatusStater("clear")
         console.log("Error on contract interaction, aborting....")
         console.error(error)
 
@@ -386,4 +422,5 @@ async function handleCommentActions(
             }
         })
     }
+    sendCommentStatusStater("clear")
 }

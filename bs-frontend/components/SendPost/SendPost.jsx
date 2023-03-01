@@ -12,6 +12,7 @@ import Web3 from "web3"
 import { useNotification } from "web3uikit"
 import { Bounce, toast, Zoom } from "react-toastify"
 import html2canvas from "html2canvas"
+import { LinearProgress } from "@mui/material"
 
 export default function SendPost() {
     const [currentPostCreationData, setCurrentPostCreationData] = useState({
@@ -29,11 +30,20 @@ export default function SendPost() {
 
     const containerRef = useRef(null)
 
+    /**
+     * 0 is "finished or started"
+     * 0-20-40-60-80-100-0
+     * for progress
+     */
+    const [postSendingProgress, setPostSendingProgress] = useState(0)
+
     async function handleSubmit() {
-        setShowPanel((a) => false)
+        setPostSendingProgress((a) => 0)
 
         const file = currentPostCreationData.image
         let textOnly
+
+        setPostSendingProgress((a) => 20)
 
         let imageURI
         if (file != "noImage") {
@@ -44,6 +54,9 @@ export default function SendPost() {
             textOnly = "true"
             console.log("Image Not Found...")
             let imgData
+
+            setPostSendingProgress((a) => 40)
+
             await html2canvas(containerRef.current).then((canvas) => {
                 imgData = canvas.toDataURL()
             })
@@ -56,7 +69,10 @@ export default function SendPost() {
                 ia[i] = byteString.charCodeAt(i)
             }
             const file = new Blob([ab], { type: mimeString })
+
+            setPostSendingProgress((a) => 60)
             imageURI = await sendFileToIpfs(file)
+
             console.log(imageURI)
         }
 
@@ -71,6 +87,8 @@ export default function SendPost() {
         imageMetadata.textOnly = textOnly
 
         const json = imageMetadata
+
+        setPostSendingProgress((a) => 80)
 
         const metadataURI = await sendJSONToIpfs(json)
 
@@ -91,8 +109,11 @@ export default function SendPost() {
             onSuccess: (results) => handleApproveSuccess(results),
             onError: (error) => {
                 console.error(error)
+                setPostSendingProgress((a) => 0)
             },
         })
+
+        setPostSendingProgress((a) => 90)
     }
 
     async function handleApproveSuccess(tx) {
@@ -126,10 +147,11 @@ export default function SendPost() {
             `color : #FF8B00 `,
             `color : #EC5AE7`
         )
-
+        setPostSendingProgress((a) => 95)
         try {
             await tx.wait(1)
         } catch (error) {
+            setPostSendingProgress((a) => 0)
             handleNewNotification(
                 "error",
                 "Transaction Couldn't Confirmed!",
@@ -158,6 +180,8 @@ export default function SendPost() {
             console.error(error)
             return
         }
+
+        setPostSendingProgress((a) => 100)
 
         handleNewNotification(
             "success",
@@ -278,12 +302,35 @@ export default function SendPost() {
                                     />
                                 </div>
 
-                                <button
-                                    className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                                    type="submit"
-                                >
-                                    Send Post
-                                </button>
+                                {postSendingProgress == 0 ? (
+                                    <button
+                                        className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        type="submit"
+                                    >
+                                        Send Post
+                                    </button>
+                                ) : postSendingProgress == 100 ? (
+                                    <>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={postSendingProgress}
+                                            style={{
+                                                height: 10,
+                                            }}
+                                            color="info"
+                                        />
+                                        {setPostSendingProgress(0)}
+                                    </>
+                                ) : (
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={postSendingProgress}
+                                        style={{
+                                            height: 10,
+                                        }}
+                                        color="info"
+                                    />
+                                )}
                             </div>
                         </form>
                     </>
