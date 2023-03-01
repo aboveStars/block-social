@@ -14,7 +14,7 @@ Overall, "Block Social" seeks to address the privacy and data ownership issues t
 Project has three parts:
 - **Backend**: This part contains "Block Social"' backend. Backend part is written with "hardhat" framework. There are "smart contract" and "tests" for it.
 - **Frontend**: This parts contains "Block Social" frontend. Frontend part is written with "react".
-- **?**: This part to store "indexing 'smart contract'". This part written with "The Graph".
+- **Graph**: This part to store "indexing 'smart contract'". This part written with "The Graph".
 ## Usage
 ...
 ## Contributing
