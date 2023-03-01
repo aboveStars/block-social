@@ -22,4 +22,4 @@ Project has three parts:
 ## License
 MIT
 ## Acknowledgments
-❤️ Open Sources ❤️
+❤️ Open Source ❤️
