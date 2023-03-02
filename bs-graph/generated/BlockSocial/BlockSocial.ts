@@ -114,16 +114,16 @@ export class Liked__Params {
   }
 }
 
-export class MintingFinished extends ethereum.Event {
-  get params(): MintingFinished__Params {
-    return new MintingFinished__Params(this);
+export class PostMinted extends ethereum.Event {
+  get params(): PostMinted__Params {
+    return new PostMinted__Params(this);
   }
 }
 
-export class MintingFinished__Params {
-  _event: MintingFinished;
+export class PostMinted__Params {
+  _event: PostMinted;
 
-  constructor(event: MintingFinished) {
+  constructor(event: PostMinted) {
     this._event = event;
   }
 
@@ -135,34 +135,8 @@ export class MintingFinished__Params {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get nftAddress(): Address {
-    return this._event.parameters[2].value.toAddress();
-  }
-}
-
-export class MintingRequestReceived extends ethereum.Event {
-  get params(): MintingRequestReceived__Params {
-    return new MintingRequestReceived__Params(this);
-  }
-}
-
-export class MintingRequestReceived__Params {
-  _event: MintingRequestReceived;
-
-  constructor(event: MintingRequestReceived) {
-    this._event = event;
-  }
-
-  get from(): Address {
-    return this._event.parameters[0].value.toAddress();
-  }
-
-  get tokenId(): BigInt {
-    return this._event.parameters[1].value.toBigInt();
-  }
-
-  get nftAddress(): Address {
-    return this._event.parameters[2].value.toAddress();
+  get postNumber(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
   }
 }
 
@@ -218,9 +192,9 @@ export class UnLiked__Params {
   }
 }
 
-export class blockSocial extends ethereum.SmartContract {
-  static bind(address: Address): blockSocial {
-    return new blockSocial("blockSocial", address);
+export class BlockSocial extends ethereum.SmartContract {
+  static bind(address: Address): BlockSocial {
+    return new BlockSocial("BlockSocial", address);
   }
 
   balanceOf(owner: Address): BigInt {
@@ -319,6 +293,21 @@ export class blockSocial extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  getPostCount(): BigInt {
+    let result = super.call("getPostCount", "getPostCount():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_getPostCount(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall("getPostCount", "getPostCount():(uint256)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
   getTokenCount(): BigInt {
     let result = super.call("getTokenCount", "getTokenCount():(uint256)", []);
 
@@ -396,6 +385,25 @@ export class blockSocial extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  s_postCounter(): BigInt {
+    let result = super.call("s_postCounter", "s_postCounter():(uint256)", []);
+
+    return result[0].toBigInt();
+  }
+
+  try_s_postCounter(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "s_postCounter",
+      "s_postCounter():(uint256)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
   s_tokenCounter(): BigInt {

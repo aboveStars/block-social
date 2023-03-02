@@ -11,19 +11,15 @@ error BLockSocial_TokenIdNotExist();
 contract BlockSocial is ERC721URIStorage {
     uint256 public s_tokenCounter;
 
+    uint256 public s_postCounter;
+
     mapping(uint256 => uint256) public s_tokenIdToLikeCount; // dynamic
     mapping(uint256 => mapping(address => bool)) public s_tokenIdToWhoLiked; // dynamic
 
-    event MintingFinished(
+    event PostMinted(
         address indexed from,
         uint256 indexed tokenId,
-        address indexed nftAddress
-    );
-
-    event MintingRequestReceived(
-        address indexed from,
-        uint256 indexed tokenId,
-        address indexed nftAddress
+        uint256 indexed postNumber
     );
 
     event Liked(
@@ -40,23 +36,23 @@ contract BlockSocial is ERC721URIStorage {
 
     event CommentMinted(
         uint256 indexed commentToTokenId,
-        address from,
+        address indexed from,
         uint256 indexed commentTokenId
     );
 
     constructor() ERC721("BlockSocial", "BS") {
         s_tokenCounter = 0;
+        s_postCounter = 0;
     }
 
     function mintingPost(string memory _uri) public {
-        emit MintingRequestReceived(msg.sender, s_tokenCounter, address(this));
-
         _safeMint(msg.sender, s_tokenCounter);
         _setTokenURI(s_tokenCounter, _uri);
 
-        emit MintingFinished(msg.sender, s_tokenCounter, address(this));
+        emit PostMinted(msg.sender, s_tokenCounter, s_postCounter);
 
         s_tokenCounter += 1;
+        s_postCounter += 1;
     }
 
     function like(uint256 _tokenId) public {
@@ -123,5 +119,9 @@ contract BlockSocial is ERC721URIStorage {
             revert BLockSocial_TokenIdNotExist();
         }
         return s_tokenIdToWhoLiked[_tokenId][_personAddress];
+    }
+
+    function getPostCount() public view returns (uint256 postCount) {
+        postCount = s_postCounter;
     }
 }

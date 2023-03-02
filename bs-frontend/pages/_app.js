@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css"
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.0.9",
+    uri: "https://api.studio.thegraph.com/query/41318/blocksocial/v0.1",
 })
 
 export default function App({ Component, pageProps }) {

@@ -12,20 +12,9 @@ describe("BlockSocial", async function () {
     })
 
     describe("Is mintingPost Events working ?", () => {
-        it("Has 'MintingRequestReceived' been emitted ? ", async function () {
+        it("Has 'PostMinted' been emitted' ?", async function () {
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingRequestReceived", async () => {
-                    resolve()
-                })
-                const metaUri = await postToIpfs("1907", false)
-                const tx = await blockSocial.mintingPost(metaUri)
-                await tx.wait(1)
-            })
-        })
-
-        it("Has 'MintingFinished been emitted' ?", async function () {
-            await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     resolve()
                 })
                 const metaUri = await postToIpfs("1907", false)
@@ -35,22 +24,27 @@ describe("BlockSocial", async function () {
         })
     })
 
-    describe("Is 'Token Count' working right ?", () => {
-        it("Is 'Token Count' 0 at start ?", async () => {
+    describe("Is 'Token Count and Post Count' working right ?", () => {
+        it("Is 'Token Count' and 'Post Count' 0 at start ?", async () => {
             const tokenCount = await blockSocial.getTokenCount()
+            const postCount = await blockSocial.getPostCount()
             try {
                 assert(tokenCount == "0")
+                assert(postCount == "0")
             } catch (error) {
                 console.error(error)
             }
         })
 
-        it("Will 'Token Count' be 1 after mintingPost", async () => {
+        it("Will 'Token Count' and 'Post Count' be 1 after mintingPost", async () => {
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     const tokenCount = await blockSocial.getTokenCount()
+                    const postCount = await blockSocial.getPostCount()
+
                     try {
                         assert(tokenCount == "1")
+                        assert(postCount == "1")
                     } catch (error) {
                         reject(error)
                     }
@@ -65,7 +59,7 @@ describe("BlockSocial", async function () {
 
         it("Will 'Token Count' be 2 after 2 mintingPost", async () => {
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     resolve()
                 })
 
@@ -75,7 +69,7 @@ describe("BlockSocial", async function () {
             })
 
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     const tokenCount = await blockSocial.getTokenCount()
                     try {
                         assert(tokenCount == "2")
@@ -95,7 +89,7 @@ describe("BlockSocial", async function () {
     describe("Is 'tokenURI' right ?", () => {
         it("Is 'tokenURI' rigth for mintingPost 1 NFT", async () => {
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     let tokenUri
                     try {
                         tokenUri = await blockSocial.tokenURI("0")
@@ -120,7 +114,7 @@ describe("BlockSocial", async function () {
 
         it("Is 'tokenURI' rigth for mintingPost 2 NFT", async () => {
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     resolve()
                 })
 
@@ -130,7 +124,7 @@ describe("BlockSocial", async function () {
             })
 
             await new Promise(async (resolve, reject) => {
-                blockSocial.once("MintingFinished", async () => {
+                blockSocial.once("PostMinted", async () => {
                     let tokenUri
                     try {
                         tokenUri = await blockSocial.tokenURI("1")
@@ -371,6 +365,27 @@ describe("BlockSocial", async function () {
                 blockSocial,
                 "BLockSocial_TokenIdNotExist"
             )
+        })
+
+        it("Is comment minting affecting 'postCount' ?", async () => {
+            await new Promise(async (resolve, reject) => {
+                blockSocial.once("CommentMinted", async () => {
+                    const postCount = await blockSocial.getPostCount()
+                    try {
+                        assert.equal(postCount, "1")
+                    } catch (error) {
+                        reject(error)
+                    }
+                    resolve()
+                })
+
+                try {
+                    const tx = await blockSocial.mintComment("0", "uri")
+                    await tx.wait(1)
+                } catch (error) {
+                    reject(error)
+                }
+            })
         })
 
         it("Is 'mintingComment' minting right ? ", async () => {

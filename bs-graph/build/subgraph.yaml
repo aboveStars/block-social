@@ -3,12 +3,12 @@ schema:
   file: schema.graphql
 dataSources:
   - kind: ethereum
-    name: blockSocial
+    name: BlockSocial
     network: goerli
     source:
-      address: "0x78084bf8FAE05b298677B7079eAa051256eFD90D"
-      abi: blockSocial
-      startBlock: 8490134
+      address: "0x89db716573Be5a11Bb752E7381634B7dE35479FE"
+      abi: BlockSocial
+      startBlock: 8584665
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -18,28 +18,25 @@ dataSources:
         - ApprovalForAll
         - CommentMinted
         - Liked
-        - MintingFinished
-        - MintingRequestReceived
+        - PostMinted
         - Transfer
         - UnLiked
       abis:
-        - name: blockSocial
-          file: blockSocial/abis/blockSocial.json
+        - name: BlockSocial
+          file: BlockSocial/abis/BlockSocial.json
       eventHandlers:
         - event: Approval(indexed address,indexed address,indexed uint256)
           handler: handleApproval
         - event: ApprovalForAll(indexed address,indexed address,bool)
           handler: handleApprovalForAll
-        - event: CommentMinted(indexed uint256,address,indexed uint256)
+        - event: CommentMinted(indexed uint256,indexed address,indexed uint256)
           handler: handleCommentMinted
         - event: Liked(indexed address,indexed uint256,indexed uint256)
           handler: handleLiked
-        - event: MintingFinished(indexed address,indexed uint256,indexed address)
-          handler: handleMintingFinished
-        - event: MintingRequestReceived(indexed address,indexed uint256,indexed address)
-          handler: handleMintingRequestReceived
+        - event: PostMinted(indexed address,indexed uint256,indexed uint256)
+          handler: handlePostMinted
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
         - event: UnLiked(indexed address,indexed uint256,indexed uint256)
           handler: handleUnLiked
-      file: blockSocial/blockSocial.wasm
+      file: BlockSocial/BlockSocial.wasm

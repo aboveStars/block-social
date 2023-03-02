@@ -38,21 +38,11 @@ type Liked @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type MintingFinished @entity(immutable: true) {
+type PostMinted @entity(immutable: true) {
   id: Bytes!
   from: Bytes! # address
   tokenId: BigInt! # uint256
-  nftAddress: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type MintingRequestReceived @entity(immutable: true) {
-  id: Bytes!
-  from: Bytes! # address
-  tokenId: BigInt! # uint256
-  nftAddress: Bytes! # address
+  postNumber: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

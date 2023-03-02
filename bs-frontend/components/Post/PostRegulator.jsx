@@ -2,8 +2,8 @@ import Web3 from "web3"
 import { useEffect, useState } from "react"
 import { apolloClient } from "@/pages/_app"
 import {
-    gqlCreatorForDesiredSenderAddress,
     gqlCreatorForDesiredTokenIdToComment,
+    postGettingQuery,
 } from "@/utils/graphQueries"
 import Post from "./Post"
 import { useMoralis, useWeb3Contract } from "react-moralis"
@@ -34,6 +34,8 @@ export default function PostRegulator(props) {
 
     const dispatch = useNotification()
 
+    const [paging, setPaging] = useState(0)
+
     async function postComponentArrayCreator() {
         setPostStatus((a) => "Preparing")
         const {
@@ -41,17 +43,17 @@ export default function PostRegulator(props) {
             error,
             loading,
         } = await apolloClient.query({
-            query: gqlCreatorForDesiredSenderAddress(searchKeyword),
+            query: postGettingQuery(searchKeyword, paging),
         })
-        const mintingFinisheds = dataFromQuery.mintingFinisheds
+        const postMinteds = dataFromQuery.postMinteds
 
-        const orderedMintingFinisheds = [...mintingFinisheds]
-        orderedMintingFinisheds.sort((a, b) => {
+        const orderedPostMinteds = [...postMinteds]
+        orderedPostMinteds.sort((a, b) => {
             return b.tokenId - a.tokenId
         })
 
         const mainPostComponentArray = await Promise.all(
-            orderedMintingFinisheds.map(async (m) => {
+            orderedPostMinteds.map(async (m) => {
                 const likeData = {
                     likeCount: (
                         await handleContractFunctions("likeCount", m.tokenId)
@@ -392,7 +394,27 @@ export default function PostRegulator(props) {
                         handleApproveSuccess(results, "Comment Sending"),
                 })
                 console.log("This will be used for test")
+            case "getPostCount":
+                const _approveOptionsForGettingPostCount = { ...approveOptions }
+                _approveOptionsForGettingPostCount.abi = blockSocialAbi
 
+                _approveOptionsForGettingPostCount.contractAddress =
+                    contractNetworkInformations["BlockSocial"][
+                        Web3.utils.hexToNumberString(chainId)
+                    ]
+
+                _approveOptionsForGettingPostCount.functionName = "getPostCount"
+                _approveOptionsForGettingPostCount.params = {}
+
+                const postCount = await runContractFunction({
+                    params: _approveOptionsForGettingPostCount,
+                    onError: (error) => {
+                        console.error(error)
+                        throw error
+                    },
+                })
+
+                return postCount
             default:
                 break
         }

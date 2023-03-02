@@ -5,11 +5,10 @@ import {
   ApprovalForAll,
   CommentMinted,
   Liked,
-  MintingFinished,
-  MintingRequestReceived,
+  PostMinted,
   Transfer,
   UnLiked
-} from "../generated/blockSocial/blockSocial"
+} from "../generated/BlockSocial/BlockSocial"
 
 export function createApprovalEvent(
   owner: Address,
@@ -117,62 +116,32 @@ export function createLikedEvent(
   return likedEvent
 }
 
-export function createMintingFinishedEvent(
+export function createPostMintedEvent(
   from: Address,
   tokenId: BigInt,
-  nftAddress: Address
-): MintingFinished {
-  let mintingFinishedEvent = changetype<MintingFinished>(newMockEvent())
+  postNumber: BigInt
+): PostMinted {
+  let postMintedEvent = changetype<PostMinted>(newMockEvent())
 
-  mintingFinishedEvent.parameters = new Array()
+  postMintedEvent.parameters = new Array()
 
-  mintingFinishedEvent.parameters.push(
+  postMintedEvent.parameters.push(
     new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
   )
-  mintingFinishedEvent.parameters.push(
+  postMintedEvent.parameters.push(
     new ethereum.EventParam(
       "tokenId",
       ethereum.Value.fromUnsignedBigInt(tokenId)
     )
   )
-  mintingFinishedEvent.parameters.push(
+  postMintedEvent.parameters.push(
     new ethereum.EventParam(
-      "nftAddress",
-      ethereum.Value.fromAddress(nftAddress)
+      "postNumber",
+      ethereum.Value.fromUnsignedBigInt(postNumber)
     )
   )
 
-  return mintingFinishedEvent
-}
-
-export function createMintingRequestReceivedEvent(
-  from: Address,
-  tokenId: BigInt,
-  nftAddress: Address
-): MintingRequestReceived {
-  let mintingRequestReceivedEvent = changetype<MintingRequestReceived>(
-    newMockEvent()
-  )
-
-  mintingRequestReceivedEvent.parameters = new Array()
-
-  mintingRequestReceivedEvent.parameters.push(
-    new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
-  )
-  mintingRequestReceivedEvent.parameters.push(
-    new ethereum.EventParam(
-      "tokenId",
-      ethereum.Value.fromUnsignedBigInt(tokenId)
-    )
-  )
-  mintingRequestReceivedEvent.parameters.push(
-    new ethereum.EventParam(
-      "nftAddress",
-      ethereum.Value.fromAddress(nftAddress)
-    )
-  )
-
-  return mintingRequestReceivedEvent
+  return postMintedEvent
 }
 
 export function createTransferEvent(

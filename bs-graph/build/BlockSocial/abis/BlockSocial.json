@@ -79,7 +79,7 @@
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "from",
         "type": "address"
@@ -136,37 +136,12 @@
       },
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "nftAddress",
-        "type": "address"
-      }
-    ],
-    "name": "MintingFinished",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "postNumber",
         "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "nftAddress",
-        "type": "address"
       }
     ],
-    "name": "MintingRequestReceived",
+    "name": "PostMinted",
     "type": "event"
   },
   {
@@ -320,6 +295,19 @@
   },
   {
     "inputs": [],
+    "name": "getPostCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "postCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getTokenCount",
     "outputs": [
       {
@@ -426,6 +414,19 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "s_postCounter",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

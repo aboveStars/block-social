@@ -8,7 +8,7 @@ import {
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { Approval } from "../generated/schema"
-import { Approval as ApprovalEvent } from "../generated/blockSocial/blockSocial"
+import { Approval as ApprovalEvent } from "../generated/BlockSocial/BlockSocial"
 import { handleApproval } from "../src/block-social"
 import { createApprovalEvent } from "./block-social-utils"
 

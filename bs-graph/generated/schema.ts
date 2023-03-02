@@ -359,7 +359,7 @@ export class Liked extends Entity {
   }
 }
 
-export class MintingFinished extends Entity {
+export class PostMinted extends Entity {
   constructor(id: Bytes) {
     super();
     this.set("id", Value.fromBytes(id));
@@ -367,19 +367,19 @@ export class MintingFinished extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save MintingFinished entity without an ID");
+    assert(id != null, "Cannot save PostMinted entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.BYTES,
-        `Entities of type MintingFinished must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type PostMinted must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("MintingFinished", id.toBytes().toHexString(), this);
+      store.set("PostMinted", id.toBytes().toHexString(), this);
     }
   }
 
-  static load(id: Bytes): MintingFinished | null {
-    return changetype<MintingFinished | null>(
-      store.get("MintingFinished", id.toHexString())
+  static load(id: Bytes): PostMinted | null {
+    return changetype<PostMinted | null>(
+      store.get("PostMinted", id.toHexString())
     );
   }
 
@@ -410,104 +410,13 @@ export class MintingFinished extends Entity {
     this.set("tokenId", Value.fromBigInt(value));
   }
 
-  get nftAddress(): Bytes {
-    let value = this.get("nftAddress");
-    return value!.toBytes();
-  }
-
-  set nftAddress(value: Bytes) {
-    this.set("nftAddress", Value.fromBytes(value));
-  }
-
-  get blockNumber(): BigInt {
-    let value = this.get("blockNumber");
+  get postNumber(): BigInt {
+    let value = this.get("postNumber");
     return value!.toBigInt();
   }
 
-  set blockNumber(value: BigInt) {
-    this.set("blockNumber", Value.fromBigInt(value));
-  }
-
-  get blockTimestamp(): BigInt {
-    let value = this.get("blockTimestamp");
-    return value!.toBigInt();
-  }
-
-  set blockTimestamp(value: BigInt) {
-    this.set("blockTimestamp", Value.fromBigInt(value));
-  }
-
-  get transactionHash(): Bytes {
-    let value = this.get("transactionHash");
-    return value!.toBytes();
-  }
-
-  set transactionHash(value: Bytes) {
-    this.set("transactionHash", Value.fromBytes(value));
-  }
-}
-
-export class MintingRequestReceived extends Entity {
-  constructor(id: Bytes) {
-    super();
-    this.set("id", Value.fromBytes(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(
-      id != null,
-      "Cannot save MintingRequestReceived entity without an ID"
-    );
-    if (id) {
-      assert(
-        id.kind == ValueKind.BYTES,
-        `Entities of type MintingRequestReceived must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("MintingRequestReceived", id.toBytes().toHexString(), this);
-    }
-  }
-
-  static load(id: Bytes): MintingRequestReceived | null {
-    return changetype<MintingRequestReceived | null>(
-      store.get("MintingRequestReceived", id.toHexString())
-    );
-  }
-
-  get id(): Bytes {
-    let value = this.get("id");
-    return value!.toBytes();
-  }
-
-  set id(value: Bytes) {
-    this.set("id", Value.fromBytes(value));
-  }
-
-  get from(): Bytes {
-    let value = this.get("from");
-    return value!.toBytes();
-  }
-
-  set from(value: Bytes) {
-    this.set("from", Value.fromBytes(value));
-  }
-
-  get tokenId(): BigInt {
-    let value = this.get("tokenId");
-    return value!.toBigInt();
-  }
-
-  set tokenId(value: BigInt) {
-    this.set("tokenId", Value.fromBigInt(value));
-  }
-
-  get nftAddress(): Bytes {
-    let value = this.get("nftAddress");
-    return value!.toBytes();
-  }
-
-  set nftAddress(value: Bytes) {
-    this.set("nftAddress", Value.fromBytes(value));
+  set postNumber(value: BigInt) {
+    this.set("postNumber", Value.fromBigInt(value));
   }
 
   get blockNumber(): BigInt {

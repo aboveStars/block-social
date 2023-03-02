@@ -3,18 +3,16 @@ import {
   ApprovalForAll as ApprovalForAllEvent,
   CommentMinted as CommentMintedEvent,
   Liked as LikedEvent,
-  MintingFinished as MintingFinishedEvent,
-  MintingRequestReceived as MintingRequestReceivedEvent,
+  PostMinted as PostMintedEvent,
   Transfer as TransferEvent,
   UnLiked as UnLikedEvent
-} from "../generated/blockSocial/blockSocial"
+} from "../generated/BlockSocial/BlockSocial"
 import {
   Approval,
   ApprovalForAll,
   CommentMinted,
   Liked,
-  MintingFinished,
-  MintingRequestReceived,
+  PostMinted,
   Transfer,
   UnLiked
 } from "../generated/schema"
@@ -79,30 +77,13 @@ export function handleLiked(event: LikedEvent): void {
   entity.save()
 }
 
-export function handleMintingFinished(event: MintingFinishedEvent): void {
-  let entity = new MintingFinished(
+export function handlePostMinted(event: PostMintedEvent): void {
+  let entity = new PostMinted(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   entity.from = event.params.from
   entity.tokenId = event.params.tokenId
-  entity.nftAddress = event.params.nftAddress
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
-}
-
-export function handleMintingRequestReceived(
-  event: MintingRequestReceivedEvent
-): void {
-  let entity = new MintingRequestReceived(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.from = event.params.from
-  entity.tokenId = event.params.tokenId
-  entity.nftAddress = event.params.nftAddress
+  entity.postNumber = event.params.postNumber
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
