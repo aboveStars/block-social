@@ -2,10 +2,10 @@ export default function Skeletons() {
     return (
         <>
             <ul className="flex flex-col gap-8">
-                {Array.from({ length: 2 }, (_, index) => (
+                {Array.from({ length: 1 }, (_, index) => (
                     <li
                         role="status"
-                        className="w-full p-4 border border-gray-50 rounded shadow animate-pulse md:p-6 dark:border-gray-700 flex flex-col gap-2"
+                        className="w-full p-4 border border-gray-50 rounded-xl shadow animate-pulse md:p-6 dark:border-gray-700 flex flex-col gap-2"
                         key={index}
                     >
                         <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>

@@ -25,19 +25,20 @@ export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
     const isAddressValid = Web3.utils.isAddress(searchKeyword)
 
-    const [posts, setPosts] = useState(null)
+    const [posts, setPosts] = useState([])
 
     const { chainId, account } = useMoralis()
     const { runContractFunction } = useWeb3Contract({})
-
-    const [postsStatus, setPostStatus] = useState("NoStatusProvided")
 
     const dispatch = useNotification()
 
     const [paging, setPaging] = useState(0)
 
+    const [isFetching, setIsFetching] = useState(false)
+    const [hasMore, setHasMore] = useState(false)
+
     async function postComponentArrayCreator() {
-        setPostStatus((a) => "Preparing")
+        setIsFetching(true)
         const {
             data: dataFromQuery,
             error,
@@ -166,7 +167,10 @@ export default function PostRegulator(props) {
                 // --------------------------------------------------------
 
                 const postTokenId = m.tokenId
-                const postContractAddress = m.nftAddress
+                const postContractAddress =
+                    contractNetworkInformations["BlockSocial"][
+                        Web3.utils.hexToNumberString(chainId)
+                    ]
                 // ------------------------------------------------------
 
                 const postOpenSeaSource = `${urlPrefixForOpensea}${postContractAddress}/${postTokenId}`
@@ -181,39 +185,51 @@ export default function PostRegulator(props) {
                 const contractFunctionCaller = handleContractFunctions
 
                 return (
-                    <Post
-                        likeData={likeData}
-                        commentData={commentData}
-                        postSender={postSender}
-                        postSenderImageSource={postSenderImageSource}
-                        postSenderOpenSeaSource={postSenderOpenSeaSource}
-                        postImageSource={postImageSource}
-                        postTitle={postTitle}
-                        postDescription={postDescription}
-                        postTextOnly={postTextOnly}
-                        postTokenId={postTokenId}
-                        postContractAddress={postContractAddress}
-                        postOpenSeaSource={postOpenSeaSource}
-                        ourAccountAddress={ourAccountAddress}
-                        ourAccountImageSource={ourAccountImageSource}
-                        ourAccountOpenSeaSource={ourAccountOpenSeaSource}
-                        contractFunctionCaller={contractFunctionCaller}
-                    />
+                    <>
+                        <Post
+                            likeData={likeData}
+                            commentData={commentData}
+                            postSender={postSender}
+                            postSenderImageSource={postSenderImageSource}
+                            postSenderOpenSeaSource={postSenderOpenSeaSource}
+                            postImageSource={postImageSource}
+                            postTitle={postTitle}
+                            postDescription={postDescription}
+                            postTextOnly={postTextOnly}
+                            postTokenId={postTokenId}
+                            postContractAddress={postContractAddress}
+                            postOpenSeaSource={postOpenSeaSource}
+                            ourAccountAddress={ourAccountAddress}
+                            ourAccountImageSource={ourAccountImageSource}
+                            ourAccountOpenSeaSource={ourAccountOpenSeaSource}
+                            contractFunctionCaller={contractFunctionCaller}
+                        />
+                    </>
                 )
             })
         )
         const filteredMainPostComponentArray = mainPostComponentArray.filter(
             (a) => a
         )
-        setPostStatus((a) => "Ready")
-        setPosts(filteredMainPostComponentArray)
+        // setPostStatus((a) => "Ready")
+        setPosts((prev) => [...prev, ...filteredMainPostComponentArray])
+
+        const totalPostsInServer = await handleContractFunctions("getPostCount")
+        const totalPostsInHand =
+            posts.length + filteredMainPostComponentArray.length
+        const hasMoreResult = totalPostsInServer != totalPostsInHand
+        setHasMore(hasMoreResult)
+        console.log(
+            `Total Posts In Server: ${totalPostsInServer} \n Now We have: ${totalPostsInHand}`
+        )
+        setIsFetching(false)
     }
 
     useEffect(() => {
         if (isAddressValid) {
             postComponentArrayCreator()
         }
-    }, [searchKeyword])
+    }, [searchKeyword, paging])
 
     async function handleContractFunctions(
         action,
@@ -526,7 +542,12 @@ export default function PostRegulator(props) {
 
     return (
         <>
-            <PostLineUp posts={posts} postsStatus={postsStatus} />
+            <PostLineUp
+                posts={posts}
+                pageSetter={setPaging}
+                isFetching={isFetching}
+                hasMore={hasMore}
+            />
         </>
     )
 }
