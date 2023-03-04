@@ -207,17 +207,20 @@ export default function SendPost() {
     return (
         <>
             <div className="flex flex-col gap-7">
-                <button
-                    className="text-white"
-                    onClick={() => {
-                        setShowPanel((prev) => !prev)
-                    }}
-                >
-                    <div className="flex gap-2">
-                        <BsPlusCircle color="white" size="25" />
-                        Create
-                    </div>
-                </button>
+                <div>
+                    <button
+                        className="text-white"
+                        onClick={() => {
+                            setShowPanel((prev) => !prev)
+                        }}
+                    >
+                        <div className="flex gap-2">
+                            <BsPlusCircle color="white" size="25" />
+                            Create
+                        </div>
+                    </button>
+                </div>
+
                 {showPanel == true ? (
                     <>
                         <form

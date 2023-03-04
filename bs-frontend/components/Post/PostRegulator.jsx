@@ -20,6 +20,7 @@ import { Bounce, toast, Zoom } from "react-toastify"
 import PostLineUp from "./PostLineUp"
 import { metaDataTemplate } from "@/utils/metadataTemplate"
 import { sendFileToIpfs, sendJSONToIpfs } from "@/scripts/pinataOperations"
+import FailedPost from "./FailedPost"
 
 export default function PostRegulator(props) {
     const searchKeyword = props.searchKeyword
@@ -39,12 +40,14 @@ export default function PostRegulator(props) {
 
     async function postComponentArrayCreator() {
         setIsFetching(true)
+        console.log(`Page: ${paging}`)
+        console.log("We are crating posts...")
         const {
             data: dataFromQuery,
             error,
             loading,
         } = await apolloClient.query({
-            query: postGettingQuery(searchKeyword, paging),
+            query: postGettingQuery(paging),
         })
         const postMinteds = dataFromQuery.postMinteds
 
@@ -158,7 +161,11 @@ export default function PostRegulator(props) {
                     postMetadata = await (await fetch(postMetadataURI)).json()
                 } catch (error) {
                     console.error("Metadata URI is not valid!")
-                    return undefined
+                    return (
+                        <div className="text-white">
+                            <FailedPost />
+                        </div>
+                    )
                 }
                 const postImageSource = postMetadata.image
                 const postTitle = postMetadata.name
@@ -185,39 +192,58 @@ export default function PostRegulator(props) {
                 const contractFunctionCaller = handleContractFunctions
 
                 return (
-                    <>
-                        <Post
-                            likeData={likeData}
-                            commentData={commentData}
-                            postSender={postSender}
-                            postSenderImageSource={postSenderImageSource}
-                            postSenderOpenSeaSource={postSenderOpenSeaSource}
-                            postImageSource={postImageSource}
-                            postTitle={postTitle}
-                            postDescription={postDescription}
-                            postTextOnly={postTextOnly}
-                            postTokenId={postTokenId}
-                            postContractAddress={postContractAddress}
-                            postOpenSeaSource={postOpenSeaSource}
-                            ourAccountAddress={ourAccountAddress}
-                            ourAccountImageSource={ourAccountImageSource}
-                            ourAccountOpenSeaSource={ourAccountOpenSeaSource}
-                            contractFunctionCaller={contractFunctionCaller}
-                        />
-                    </>
+                    <Post
+                        key={postTokenId}
+                        likeData={likeData}
+                        commentData={commentData}
+                        postSender={postSender}
+                        postSenderImageSource={postSenderImageSource}
+                        postSenderOpenSeaSource={postSenderOpenSeaSource}
+                        postImageSource={postImageSource}
+                        postTitle={postTitle}
+                        postDescription={postDescription}
+                        postTextOnly={postTextOnly}
+                        postTokenId={postTokenId}
+                        postContractAddress={postContractAddress}
+                        postOpenSeaSource={postOpenSeaSource}
+                        ourAccountAddress={ourAccountAddress}
+                        ourAccountImageSource={ourAccountImageSource}
+                        ourAccountOpenSeaSource={ourAccountOpenSeaSource}
+                        contractFunctionCaller={contractFunctionCaller}
+                    />
                 )
             })
         )
         const filteredMainPostComponentArray = mainPostComponentArray.filter(
             (a) => a
         )
+
         // setPostStatus((a) => "Ready")
-        setPosts((prev) => [...prev, ...filteredMainPostComponentArray])
+
+        let readyPosts = []
+
+        setPosts((prev) => {
+            const rawPosts = [...prev, ...filteredMainPostComponentArray]
+            let keys = []
+            const uniquePosts = rawPosts.map((post) => {
+                if (!keys.includes(post.key)) {
+                    keys.push(post.key)
+                    return post
+                } else {
+                    return null
+                }
+            })
+
+            readyPosts = uniquePosts.filter((a) => a)
+
+            return readyPosts
+        })
 
         const totalPostsInServer = await handleContractFunctions("getPostCount")
-        const totalPostsInHand =
-            posts.length + filteredMainPostComponentArray.length
-        const hasMoreResult = totalPostsInServer != totalPostsInHand
+        const totalPostsInHand = readyPosts.length
+
+        const hasMoreResult = totalPostsInServer > totalPostsInHand
+
         setHasMore(hasMoreResult)
         console.log(
             `Total Posts In Server: ${totalPostsInServer} \n Now We have: ${totalPostsInHand}`
@@ -226,10 +252,8 @@ export default function PostRegulator(props) {
     }
 
     useEffect(() => {
-        if (isAddressValid) {
-            postComponentArrayCreator()
-        }
-    }, [searchKeyword, paging])
+        postComponentArrayCreator()
+    }, [paging])
 
     async function handleContractFunctions(
         action,
@@ -546,6 +570,7 @@ export default function PostRegulator(props) {
                 posts={posts}
                 pageSetter={setPaging}
                 isFetching={isFetching}
+                isFetchingStater={setIsFetching}
                 hasMore={hasMore}
             />
         </>
