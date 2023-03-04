@@ -1,1 +1,1 @@
-export const urlPrefixForIPFS = "https://ipfs.io/ipfs/"
+export const urlPrefixForIPFS = "https://gateway.pinata.cloud/ipfs/"

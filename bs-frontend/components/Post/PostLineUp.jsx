@@ -15,10 +15,7 @@ export default function PostLineUp(props) {
             return
         }
         setIsFetching(true)
-        console.log(isFetching)
-        console.log("We will set page now")
-
-        pageSetter((a) => a + 1)
+        pageSetter((a) => a - 1)
     }
 
     return (

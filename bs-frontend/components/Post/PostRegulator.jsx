@@ -33,15 +33,20 @@ export default function PostRegulator(props) {
 
     const dispatch = useNotification()
 
-    const [paging, setPaging] = useState(0)
+    const [paging, setPaging] = useState(-1)
 
     const [isFetching, setIsFetching] = useState(false)
     const [hasMore, setHasMore] = useState(false)
 
     async function postComponentArrayCreator() {
+        const totalPostsInServer = await handleContractFunctions("getPostCount")
+        if (paging == -1) {
+            setPaging(totalPostsInServer - 1)
+            return
+        }
+
         setIsFetching(true)
-        console.log(`Page: ${paging}`)
-        console.log("We are crating posts...")
+
         const {
             data: dataFromQuery,
             error,
@@ -67,6 +72,11 @@ export default function PostRegulator(props) {
                         m.tokenId
                     ),
                 }
+
+                const contractAddress =
+                    contractNetworkInformations["BlockSocial"][
+                        Web3.utils.hexToNumberString(chainId)
+                    ]
 
                 //------------------------------------------------------
                 const {
@@ -118,7 +128,7 @@ export default function PostRegulator(props) {
                             ),
                             whoOpenSeaSource: `https://testnets.opensea.io/${c.from}`,
                             commentContent: metadata.description.toString(),
-                            openSeaSource: `https://testnets.opensea.io/assets/goerli/${m.nftAddress}/${c.commentTokenId}`,
+                            openSeaSource: `https://testnets.opensea.io/assets/goerli/${contractAddress}/${c.commentTokenId}`,
                         }
 
                         return commentObject
@@ -174,10 +184,7 @@ export default function PostRegulator(props) {
                 // --------------------------------------------------------
 
                 const postTokenId = m.tokenId
-                const postContractAddress =
-                    contractNetworkInformations["BlockSocial"][
-                        Web3.utils.hexToNumberString(chainId)
-                    ]
+                const postContractAddress = contractAddress
                 // ------------------------------------------------------
 
                 const postOpenSeaSource = `${urlPrefixForOpensea}${postContractAddress}/${postTokenId}`
@@ -220,8 +227,6 @@ export default function PostRegulator(props) {
 
         // setPostStatus((a) => "Ready")
 
-        let readyPosts = []
-
         setPosts((prev) => {
             const rawPosts = [...prev, ...filteredMainPostComponentArray]
             let keys = []
@@ -234,20 +239,16 @@ export default function PostRegulator(props) {
                 }
             })
 
-            readyPosts = uniquePosts.filter((a) => a)
+            const readyPosts = uniquePosts.filter((a) => a)
 
+            const totalPostsInHand = readyPosts.length
+
+            const hasMoreResult = totalPostsInServer > totalPostsInHand
+
+            setHasMore(hasMoreResult)
             return readyPosts
         })
 
-        const totalPostsInServer = await handleContractFunctions("getPostCount")
-        const totalPostsInHand = readyPosts.length
-
-        const hasMoreResult = totalPostsInServer > totalPostsInHand
-
-        setHasMore(hasMoreResult)
-        console.log(
-            `Total Posts In Server: ${totalPostsInServer} \n Now We have: ${totalPostsInHand}`
-        )
         setIsFetching(false)
     }
 
